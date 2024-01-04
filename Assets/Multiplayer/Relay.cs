@@ -53,7 +53,7 @@ public class Relay : MonoBehaviour
     {
         connectUIAnimator.AnimateConnectUIOut();
         startUIAnimator.AnimateStartUIIn();
-        GameManager.Instance.ChangeGameState(GameState.PRE);
+        GameManager.Instance.ChangeLocalGameStateClientRpc(GameState.PRE);
     }
     
     #region CreateRelay

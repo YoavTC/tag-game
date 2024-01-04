@@ -17,6 +17,7 @@ public class CameraMovement : MonoBehaviour
     private void Start()
     {
         followPlayer = false;
+        Destroy(GameObject.FindWithTag("TempCamera"));
     }
 
     public void MoveToPosition(Vector3 targetPosition)
@@ -25,12 +26,15 @@ public class CameraMovement : MonoBehaviour
         transform.DOMove(targetPosition, cameraSpeed).SetEase(Ease.InOutSine);
     }
 
-    public void FollowPlayer(bool shouldFollowPlayer) => followPlayer = shouldFollowPlayer;
+    public void SetFollowPlayerState(bool state)
+    {
+        followPlayer = state;
+    }
     
-    
-    public void SetTargetTransform(Transform targetTransform)
+    public void InitiateCameraSettings(Transform targetTransform)
     {
         if (playerTransform == null) playerTransform = targetTransform;
+        GameManager.Instance.clientCamera = this;
     }
     
     void FixedUpdate()

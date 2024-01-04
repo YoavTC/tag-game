@@ -6,42 +6,43 @@ public class GameManager : NetworkSingleton<GameManager>
     [SerializeField] private UIAnimator startGameAnimator;
     
     [Header("Objects")]
-    [SerializeField] private CameraMovement mainCamera;
-    [SerializeField] private Transform lobbyPosition;
+    [SerializeField] public CameraMovement clientCamera;
     
     [Header("Settings")]
-    [SerializeField] private GameState currentGameState;
     [SerializeField] private NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
     
     void Start()
     {
         currentNetworkGameState.Value = GameState.PRE;
-        currentGameState = GameState.PRE;
     }
+    
     
     public void StartGame()
     {
         if (!IsHost)
         {
             Debug.Log("Only the host can start the game!"); //display text on screen
-        } else { 
-            ChangeGameState(GameState.STARTING);
+        } else {
+            
+            ChangeLocalGameStateClientRpc(GameState.STARTING);
             currentNetworkGameState.Value = GameState.STARTING;
         }
     }
-
-    public void ChangeGameState(GameState newGameState)
+    
+    [ClientRpc]
+    public void ChangeLocalGameStateClientRpc(GameState newGameState)
     {
+        GameState currentGameState = currentNetworkGameState.Value;
+        Debug.Log("ChangedLocalGameState to " + newGameState + " - " + OwnerClientId);
         switch (newGameState)
         {
             case GameState.PRE:
-                mainCamera.MoveToPosition(lobbyPosition.position);
                 break;
             case GameState.STARTING:
                 if (currentGameState == GameState.PRE)
                 {
-                    mainCamera.FollowPlayer(true);
                     startGameAnimator.AnimateConnectUIOut();
+                    clientCamera.SetFollowPlayerState(true);
                     //Start Game
                 }
                 break;
@@ -52,8 +53,8 @@ public class GameManager : NetworkSingleton<GameManager>
             case GameState.POST:
                 break;
         }
-        currentGameState = newGameState;
-        currentNetworkGameState.Value = newGameState;
+        
+        if (IsHost) currentNetworkGameState.Value = newGameState;
     }
 }
 

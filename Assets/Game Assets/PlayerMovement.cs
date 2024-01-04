@@ -7,8 +7,8 @@ using UnityEngine.Serialization;
 
 public class PlayerMovement : NetworkBehaviour
 {
-    [Header("Keybinds")] 
-    [SerializeField] private KeyCode jumpBind;
+    [Header("Camera")] 
+    [SerializeField] private GameObject CameraPrefab;
 
     [Header("Movement Settings")] 
     [SerializeField] private float moveSpeed;
@@ -28,23 +28,36 @@ public class PlayerMovement : NetworkBehaviour
         if (!IsOwner && !testingMode) Destroy(this);
         rb = GetComponent<Rigidbody2D>();
         playerLayer = LayerMask.GetMask("Player");
+
+        CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
+        clientCamera.InitiateCameraSettings(transform);
         
         //Set camera
-        CameraMovement cameraMovement = Camera.main.GetComponent<CameraMovement>();
-
-        if (cameraMovement.playerTransform == null)
-        {
-            Camera.main.GetComponent<CameraMovement>().playerTransform = transform;
-        }
-        else {
-            Camera newCam = new GameObject("clientCam").AddComponent<Camera>();
-            newCam.gameObject.AddComponent<CameraMovement>();
-            newCam.CopyFrom(cameraMovement.GetComponent<Camera>());
-            newCam.GetComponent<CameraMovement>().SetValues(cameraMovement);
-            newCam.GetComponent<CameraMovement>().playerTransform = transform;
-            
-            if (IsHost) Destroy(newCam);
-        }
+        //CameraMovement cameraMovement = Camera.main.GetComponent<CameraMovement>();
+        // if (cameraMovement.playerTransform == null)
+        // {
+        //     Camera.main.GetComponent<CameraMovement>().playerTransform = transform;
+        // }
+        // else {
+        //     Camera newCam = new GameObject("clientCam").AddComponent<Camera>();
+        //     newCam.gameObject.AddComponent<CameraMovement>();
+        //     newCam.CopyFrom(cameraMovement.GetComponent<Camera>());
+        //     newCam.GetComponent<CameraMovement>().SetValues(cameraMovement);
+        //     newCam.GetComponent<CameraMovement>().playerTransform = transform;
+        //     
+        //     if (IsHost)
+        //     {
+        //         Destroy(newCam);
+        //     }
+        //     else
+        //     {
+        //         Camera[] otherCameras = FindObjectsOfType<Camera>();
+        //         foreach (var tempCamera in otherCameras)
+        //         {
+        //             if (tempCamera != newCam) Destroy(tempCamera.gameObject);
+        //         }
+        //     }
+        // }
         
         //Set Position
         SpawnManager.Instance.SetSpawnPoint(transform);
