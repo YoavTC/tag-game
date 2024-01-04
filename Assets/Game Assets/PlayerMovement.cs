@@ -29,8 +29,11 @@ public class PlayerMovement : NetworkBehaviour
         rb = GetComponent<Rigidbody2D>();
         playerLayer = LayerMask.GetMask("Player");
 
-        CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
-        clientCamera.InitiateCameraSettings(transform);
+        if (IsOwner)
+        {
+            CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
+            clientCamera.InitiateCameraSettings(transform);
+        }
         
         //Set camera
         //CameraMovement cameraMovement = Camera.main.GetComponent<CameraMovement>();
