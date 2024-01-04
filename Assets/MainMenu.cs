@@ -5,11 +5,16 @@ using UnityEngine.SceneManagement;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField] private string mainScene, settingsScene, creditsScene;
+    [SerializeField] private string mainScene, settingsScene, creditsScene, mainMenuScene;
 
     public void HoverOverButton()
     {
         //play sound
+    }
+
+    public void OnPressBack()
+    {
+        SceneManager.LoadScene(mainMenuScene);
     }
     
     public void OnPressPlay()

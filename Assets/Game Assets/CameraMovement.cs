@@ -4,6 +4,7 @@ using UnityEngine;
 public class CameraMovement : MonoBehaviour
 {
     private bool followPlayer;
+    [SerializeField] private bool testingMode = false;
     
     public Transform playerTransform;
     [SerializeField] private float cameraSpeed;
@@ -40,7 +41,7 @@ public class CameraMovement : MonoBehaviour
     
     void FixedUpdate()
     {
-        if (playerTransform == null || !followPlayer) return;
+        if (!testingMode && (playerTransform == null || !followPlayer)) return;
         
         cameraPos = transform.position;
         

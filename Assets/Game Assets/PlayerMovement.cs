@@ -35,33 +35,6 @@ public class PlayerMovement : NetworkBehaviour
             clientCamera.InitiateCameraSettings(transform);
         }
         
-        //Set camera
-        //CameraMovement cameraMovement = Camera.main.GetComponent<CameraMovement>();
-        // if (cameraMovement.playerTransform == null)
-        // {
-        //     Camera.main.GetComponent<CameraMovement>().playerTransform = transform;
-        // }
-        // else {
-        //     Camera newCam = new GameObject("clientCam").AddComponent<Camera>();
-        //     newCam.gameObject.AddComponent<CameraMovement>();
-        //     newCam.CopyFrom(cameraMovement.GetComponent<Camera>());
-        //     newCam.GetComponent<CameraMovement>().SetValues(cameraMovement);
-        //     newCam.GetComponent<CameraMovement>().playerTransform = transform;
-        //     
-        //     if (IsHost)
-        //     {
-        //         Destroy(newCam);
-        //     }
-        //     else
-        //     {
-        //         Camera[] otherCameras = FindObjectsOfType<Camera>();
-        //         foreach (var tempCamera in otherCameras)
-        //         {
-        //             if (tempCamera != newCam) Destroy(tempCamera.gameObject);
-        //         }
-        //     }
-        // }
-        
         //Set Position
         SpawnManager.Instance.SetSpawnPoint(transform);
     }
