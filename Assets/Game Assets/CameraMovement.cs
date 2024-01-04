@@ -18,6 +18,7 @@ public class CameraMovement : MonoBehaviour
     {
         followPlayer = false;
         Destroy(GameObject.FindWithTag("TempCamera"));
+        //test comment
     }
 
     public void MoveToPosition(Vector3 targetPosition)
