@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public class GameManager : NetworkSingleton<GameManager>
@@ -10,9 +11,11 @@ public class GameManager : NetworkSingleton<GameManager>
     
     [Header("Settings")]
     [SerializeField] private GameState currentGameState;
+    [SerializeField] private NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
     
     void Start()
     {
+        currentNetworkGameState.Value = GameState.PRE;
         currentGameState = GameState.PRE;
     }
     
@@ -23,6 +26,7 @@ public class GameManager : NetworkSingleton<GameManager>
             Debug.Log("Only the host can start the game!"); //display text on screen
         } else { 
             ChangeGameState(GameState.STARTING);
+            currentNetworkGameState.Value = GameState.STARTING;
         }
     }
 
@@ -49,6 +53,7 @@ public class GameManager : NetworkSingleton<GameManager>
                 break;
         }
         currentGameState = newGameState;
+        currentNetworkGameState.Value = newGameState;
     }
 }
 
