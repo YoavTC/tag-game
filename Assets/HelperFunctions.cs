@@ -211,6 +211,31 @@ public class HelperFunctions : MonoBehaviour
     #endregion
 
     #region UI Related
+    public static Color HexToColor(string hex)
+    {
+        if (hex.Length < 6)
+        {
+            Debug.LogError("Invalid hex string. It should be at least 6 characters long.");
+            return Color.white; // Default to white in case of an error
+        }
+
+        if (hex[0] == '#')
+        {
+            hex = hex.Substring(1);
+        }
+
+        if (hex.Length != 6)
+        {
+            Debug.LogError("Invalid hex string. It should be exactly 6 characters long.");
+            return Color.white; // Default to white in case of an error
+        }
+
+        byte r = byte.Parse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        byte g = byte.Parse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+        byte b = byte.Parse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+
+        return new Color32(r, g, b, 255);
+    }
     
     public static IEnumerator FadeCanvas(CanvasGroup canvasGroup, float fadeDuration ,bool fadeIn)
     {

@@ -8,8 +8,12 @@ public class GameManager : NetworkSingleton<GameManager>
     [Header("Objects")]
     [SerializeField] public CameraMovement clientCamera;
     
-    [Header("Settings")]
+    [Header("Network Variables")]
     [SerializeField] private NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
+    [SerializeField] private NetworkVariable<ulong> taggedPlayerClientID = new NetworkVariable<ulong>(57);
+    
+    //TODO
+    //Set up correct tagged player syncing and display for tagged player
     
     void Start()
     {
@@ -43,6 +47,7 @@ public class GameManager : NetworkSingleton<GameManager>
                 {
                     startGameAnimator.AnimateConnectUIOut();
                     clientCamera.SetFollowPlayerState(true);
+                    TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
                     //Start Game
                 }
                 break;
@@ -55,6 +60,27 @@ public class GameManager : NetworkSingleton<GameManager>
         }
         
         if (IsHost) currentNetworkGameState.Value = newGameState;
+    }
+    
+    
+    
+    [ServerRpc]
+    public void TagPlayerServerRpc(ulong taggedID, ulong taggerID)
+    {
+        taggedPlayerClientID.Value = taggedID;
+        ReceiveTagChangeClientRpc(taggedID, taggerID);
+        Debug.Log(taggerID + " tagged " + taggedID);
+        
+    }
+
+    [ClientRpc]
+    public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID)
+    {
+        if (OwnerClientId == taggedID)
+        {
+            //Tell player they got tagged
+            Debug.Log("you got tagged by " + taggerID);
+        }
     }
 }
 
