@@ -106,6 +106,8 @@ public class PlayerController : NetworkBehaviour
 
         if (taggedPlayer != null)
         {
+            isTagger = false;
+            
             TitleSystem.Instance.DisplayText("You Tagged " + taggedPlayer+ "!", true, "#d32c2f");
             GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
         }
@@ -143,10 +145,14 @@ public class PlayerController : NetworkBehaviour
         return null;
     }
 
-    public void GetTagged()
+    public void GetTagged(ulong taggedID)
     {
-        isTagger = true;
-        Debug.Log("You got tagged!");
+        Debug.Log("I am " + OwnerClientId + " and the random client id is: " + taggedID);
+        if (OwnerClientId == taggedID)
+        {
+            isTagger = true;
+            Debug.Log("You got tagged!");
+        }
     }
     #endregion
 }

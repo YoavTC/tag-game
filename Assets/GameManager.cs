@@ -45,11 +45,7 @@ public class GameManager : NetworkSingleton<GameManager>
     [ClientRpc]
     private void TagRandomPlayerClientRpc(ulong randomClientID)
     {
-        Debug.Log("I am " + OwnerClientId + " and the random client id is: " + randomClientID);
-        if (OwnerClientId == randomClientID)
-        {
-            clientCamera.playerTransform.GetComponent<PlayerController>().GetTagged();
-        }
+        clientCamera.playerTransform.GetComponent<PlayerController>().GetTagged(randomClientID);
     }
     
     [ClientRpc]
@@ -95,10 +91,7 @@ public class GameManager : NetworkSingleton<GameManager>
     public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID)
     {
         Debug.Log(taggerID + " TAGGED " + taggedID);
-        if (taggedID == OwnerClientId)
-        {
-            clientCamera.playerTransform.GetComponent<PlayerController>().GetTagged();
-        }
+        clientCamera.playerTransform.GetComponent<PlayerController>().GetTagged(taggedID);
     }
 }
 
