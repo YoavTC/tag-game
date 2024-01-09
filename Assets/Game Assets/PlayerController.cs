@@ -106,7 +106,15 @@ public class PlayerController : NetworkBehaviour
         {
             TitleSystem.Instance.DisplayText("You Tagged " + taggedPlayer+ "!", true, "#d32c2f");
             Debug.Log("You tagged " + taggedPlayer, taggedPlayer);
-            GameManager.Instance.TagPlayerServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
+            try
+            { 
+                GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                throw;
+            }
         }
     }
     

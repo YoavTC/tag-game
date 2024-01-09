@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,8 +13,6 @@ public class GameManager : NetworkSingleton<GameManager>
     [SerializeField] private NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
     [SerializeField] private NetworkVariable<ulong> taggedPlayerClientID = new NetworkVariable<ulong>(57);
     
-    //TODO
-    //Set up correct tagged player syncing and display for tagged player
     
     void Start()
     {
@@ -26,8 +25,8 @@ public class GameManager : NetworkSingleton<GameManager>
         if (!IsHost)
         {
             Debug.Log("Only the host can start the game!"); //display text on screen
-        } else {
-            
+        } else
+        {
             ChangeLocalGameStateClientRpc(GameState.STARTING);
             currentNetworkGameState.Value = GameState.STARTING;
         }
@@ -63,24 +62,13 @@ public class GameManager : NetworkSingleton<GameManager>
     }
     
     
-    
-    [ServerRpc]
-    public void TagPlayerServerRpc(ulong taggedID, ulong taggerID)
+    //Runs on server when client tags client
+    [ServerRpc(RequireOwnership = false)]
+    public void ClientTagClientServerRpc(ulong taggedID, ulong taggerID)
     {
+        Debug.Log("Got tag message from tagger: " + taggerID + " tagging: " + taggedID);
         taggedPlayerClientID.Value = taggedID;
-        ReceiveTagChangeClientRpc(taggedID, taggerID);
         Debug.Log(taggerID + " tagged " + taggedID);
-        
-    }
-
-    [ClientRpc]
-    public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID)
-    {
-        if (OwnerClientId == taggedID)
-        {
-            //Tell player they got tagged
-            Debug.Log("you got tagged by " + taggerID);
-        }
     }
 }
 
