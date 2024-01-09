@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using NaughtyAttributes;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -18,6 +19,7 @@ public class PlayerController : NetworkBehaviour
     private Rigidbody2D rb;
 
     [Header("Tagging Settings")] 
+    [SerializeField] [ReadOnly] private bool isTagger;
     [SerializeField] private float taggingRadius;
     
     private LayerMask playerLayer;
@@ -62,7 +64,7 @@ public class PlayerController : NetworkBehaviour
             else if (extraJumps > 0) Jump(true);
         }
 
-        if (Input.GetButtonDown("Tag"))
+        if (Input.GetButtonDown("Tag") && isTagger)
         {
             Tag();
         }
@@ -105,16 +107,7 @@ public class PlayerController : NetworkBehaviour
         if (taggedPlayer != null)
         {
             TitleSystem.Instance.DisplayText("You Tagged " + taggedPlayer+ "!", true, "#d32c2f");
-            Debug.Log("You tagged " + taggedPlayer, taggedPlayer);
-            try
-            { 
-                GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
-            }
-            catch (Exception e)
-            {
-                Debug.Log(e);
-                throw;
-            }
+            GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
         }
     }
     
@@ -148,6 +141,12 @@ public class PlayerController : NetworkBehaviour
         }
 
         return null;
+    }
+
+    public void GetTagged()
+    {
+        isTagger = true;
+        Debug.Log("You got tagged!");
     }
     #endregion
 }

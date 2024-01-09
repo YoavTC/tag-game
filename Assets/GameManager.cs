@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using NaughtyAttributes;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -29,6 +31,24 @@ public class GameManager : NetworkSingleton<GameManager>
         {
             ChangeLocalGameStateClientRpc(GameState.STARTING);
             currentNetworkGameState.Value = GameState.STARTING;
+            
+            //Tag random player
+            ulong[] connectedClients = NetworkManager.Singleton.ConnectedClientsIds.ToArray();
+            int randomClientIDIndex = Random.Range(0, connectedClients.Length);
+            ulong randomClientID = connectedClients[randomClientIDIndex];
+            taggedPlayerClientID.Value = randomClientID;
+            
+            TagRandomPlayerClientRpc(randomClientID);
+        }
+    }
+    
+    [ClientRpc]
+    private void TagRandomPlayerClientRpc(ulong randomClientID)
+    {
+        Debug.Log("I am " + OwnerClientId + " and the random client id is: " + randomClientID);
+        if (OwnerClientId == randomClientID)
+        {
+            clientCamera.playerTransform.GetComponent<PlayerController>().GetTagged();
         }
     }
     
@@ -66,9 +86,19 @@ public class GameManager : NetworkSingleton<GameManager>
     [ServerRpc(RequireOwnership = false)]
     public void ClientTagClientServerRpc(ulong taggedID, ulong taggerID)
     {
-        Debug.Log("Got tag message from tagger: " + taggerID + " tagging: " + taggedID);
         taggedPlayerClientID.Value = taggedID;
-        Debug.Log(taggerID + " tagged " + taggedID);
+        ReceiveTagChangeClientRpc(taggedID, taggerID);
+    }
+
+    //Runs on every client upon tag change
+    [ClientRpc]
+    public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID)
+    {
+        Debug.Log(taggerID + " TAGGED " + taggedID);
+        if (taggedID == OwnerClientId)
+        {
+            clientCamera.playerTransform.GetComponent<PlayerController>().GetTagged();
+        }
     }
 }
 
