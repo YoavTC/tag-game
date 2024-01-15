@@ -10,6 +10,7 @@ using UnityEngine.Serialization;
 public class PlayerController : NetworkBehaviour
 {
     [SerializeField] private bool testingMode;
+    private bool isLocalGame;
     
     [Header("Camera")] 
     [SerializeField] private GameObject CameraPrefab;
@@ -21,6 +22,11 @@ public class PlayerController : NetworkBehaviour
     [Header("Tagging Settings")] 
     [SerializeField] [ReadOnly] private bool isTagger;
     [SerializeField] private float taggingRadius;
+
+    [Header("Keybinds")] 
+    [SerializeField] [ReadOnly] private string moveInput = "M_PC_Horizontal";
+    [SerializeField] [ReadOnly] private string jumpInput = "L_PC1_Jump";
+    [SerializeField] [ReadOnly] private string tagInput = "L_PC1_Tag";
     
     private LayerMask playerLayer;
     [SerializeField] private float jumpForce;
@@ -30,15 +36,23 @@ public class PlayerController : NetworkBehaviour
     
     private void Start()
     {
+        Debug.Log("Player spawned!", transform);
+        isLocalGame = GameManager.Instance.isLocalGame;
+        
+        SetUpBindings();
+        
         //Delete other client's controller
-        if (!IsOwner && !testingMode) Destroy(this);
+        if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
         
         //Set up variables
         rb = GetComponent<Rigidbody2D>();
         playerLayer = LayerMask.GetMask("Player");
 
         //Spawn camera
-        if (IsOwner)
+        if (isLocalGame)
+        {
+            //TODO Set up local camera
+        } else if (IsOwner)
         {
             CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
             clientCamera.InitiateCameraSettings(transform);
@@ -51,20 +65,20 @@ public class PlayerController : NetworkBehaviour
     void Update()
     {
         //Get input movement
-        float horizontalDistance = Input.GetAxis("Horizontal");
+        float horizontalDistance = Input.GetAxis(moveInput);
         Vector2 movement = new Vector2(horizontalDistance, 0);
 
         //Apply movement velocity to the player's rigidbody
         rb.velocity = new Vector2(movement.x * moveSpeed, rb.velocity.y);
         
         //jump detection
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown(jumpInput))
         {
             if (isOnGround) Jump(false);
             else if (extraJumps > 0) Jump(true);
         }
 
-        if (Input.GetButtonDown("Tag") && isTagger)
+        if (Input.GetButtonDown(tagInput) && isTagger)
         {
             Tag();
         }
@@ -109,7 +123,9 @@ public class PlayerController : NetworkBehaviour
             isTagger = false;
             
             TitleSystem.Instance.DisplayText("You Tagged " + taggedPlayer+ "!", true, "#d32c2f");
-            GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
+            
+            if (isLocalGame) GameManager.Instance.ClientTagClient(taggedPlayer, transform);
+            else GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
         }
     }
     
@@ -145,14 +161,39 @@ public class PlayerController : NetworkBehaviour
         return null;
     }
 
-    public void GetTagged(ulong taggedID)
+    public void GetTaggedClient(ulong taggedID)
     {
-        Debug.Log("I am " + OwnerClientId + " and the random client id is: " + taggedID);
         if (OwnerClientId == taggedID)
         {
             isTagger = true;
             Debug.Log("You got tagged!");
         }
+    }
+
+    public void GetTagged()
+    {
+        isTagger = true;
+        Debug.Log("You got tagged!");
+    }
+    #endregion
+
+    #region Input Bindings
+    public void SetUpBindings()
+    {
+        if (isLocalGame)
+        {
+            InputMap inputMap = GameManager.Instance.GetComponent<InputManager>().GetInputBindingMap();
+            moveInput = inputMap.moveInputName;
+            jumpInput = inputMap.jumpInputName;
+            tagInput = inputMap.tagInputName;
+        }
+        else
+        {
+            moveInput = "M_PC_Horizontal";
+            jumpInput = "M_PC_Jump";
+            tagInput = "M_PC_Tag";
+        }
+        
     }
     #endregion
 }

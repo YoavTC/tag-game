@@ -22,26 +22,45 @@ public class Relay : MonoBehaviour
     [SerializeField] private Button createRelayButton, joinRelayButton;
     
     private string joinCode;
-    
-    async void Start()
-    {
-        InitializationOptions hostOptions = new InitializationOptions().SetProfile("host");
-        InitializationOptions clientOptions = new InitializationOptions().SetProfile("client");
-        
-        await UnityServices.InitializeAsync(hostOptions);
-        
-        AuthenticationService.Instance.SignedIn += () =>
-        {
-            Debug.Log("Signed in: " + AuthenticationService.Instance.PlayerId);
-        };
 
-        if (AuthenticationService.Instance.IsAuthorized)
+    private IEnumerator Start()
+    {
+        yield return HelperFunctions.GetWait(0.5f);
+        InitializeGame();
+    }
+
+    async void InitializeGame()
+    {
+        if (GameManager.Instance.isLocalGame)
         {
-            Debug.Log("Authorized");
-            AuthenticationService.Instance.SignOut();
-            await UnityServices.InitializeAsync(clientOptions);
+            Debug.Log("Starting Local Game...");
+            inputField.enabled = false;
+            connectUIAnimator.enabled = false;
+            joinRelayButton.interactable = false;
+            createRelayButton.interactable = false;
+            ConnectToRoom();
+            
+            //codeDisplay.alpha = 0f;
+        } else {
+            Debug.Log("Starting Online Game...");
+            InitializationOptions hostOptions = new InitializationOptions().SetProfile("host");
+            InitializationOptions clientOptions = new InitializationOptions().SetProfile("client");
+        
+            await UnityServices.InitializeAsync(hostOptions);
+        
+            AuthenticationService.Instance.SignedIn += () =>
+            {
+                Debug.Log("Signed in: " + AuthenticationService.Instance.PlayerId);
+            };
+
+            if (AuthenticationService.Instance.IsAuthorized)
+            {
+                Debug.Log("Authorized");
+                AuthenticationService.Instance.SignOut();
+                await UnityServices.InitializeAsync(clientOptions);
+            }
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
         }
-        await AuthenticationService.Instance.SignInAnonymouslyAsync();
     }
 
     public void OnInputType()
@@ -59,10 +78,12 @@ public class Relay : MonoBehaviour
     #region CreateRelay
     public async void CreateRelay()
     {
+        if (GameManager.Instance.isLocalGame) return;
         try
         {
             createRelayButton.interactable = false;
             joinRelayButton.interactable = false;
+            
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(1);
             joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             
@@ -91,6 +112,7 @@ public class Relay : MonoBehaviour
     #region JoinRelay
     public async void JoinRelay()
     {
+        if (GameManager.Instance.isLocalGame) return;
         string inputJoinCode = inputField.text;
 
         try

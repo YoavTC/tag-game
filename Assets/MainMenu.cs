@@ -19,7 +19,16 @@ public class MainMenu : MonoBehaviour
     
     public void OnPressPlay()
     {
-        SceneManager.LoadScene(mainScene);
+        NetworkModeCommunicator.isGameLocal = false;
+        StartCoroutine(StartScene(mainScene));
+        //SceneManager.LoadScene(mainScene);
+    }
+
+    public void OnPressPlayLocal()
+    {
+        NetworkModeCommunicator.isGameLocal = true;
+        StartCoroutine(StartScene(mainScene));
+        //SceneManager.LoadScene(mainScene);
     }
     
     public void OnPressSettings()
@@ -30,5 +39,11 @@ public class MainMenu : MonoBehaviour
     public void OnPressCredits()
     {
         SceneManager.LoadScene(creditsScene);
+    }
+
+    private IEnumerator StartScene(string sceneName)
+    {
+        yield return HelperFunctions.GetWait(1f);
+        SceneManager.LoadScene(sceneName);
     }
 }

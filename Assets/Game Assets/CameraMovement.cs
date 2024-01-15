@@ -18,7 +18,7 @@ public class CameraMovement : MonoBehaviour
     private void Start()
     {
         followPlayer = false;
-        Destroy(GameObject.FindWithTag("TempCamera"));
+        if (!GameManager.Instance.isLocalGame) Destroy(GameObject.FindWithTag("TempCamera"));
         //test comment
     }
 
