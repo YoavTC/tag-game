@@ -22,6 +22,7 @@ public class PlayerController : NetworkBehaviour
     [Header("Tagging Settings")] 
     [SerializeField] [ReadOnly] private bool isTagger;
     [SerializeField] private float taggingRadius;
+    [SerializeField] private GameObject tagParticle;
 
     [Header("Keybinds")] 
     [SerializeField] [ReadOnly] private string moveInput = "M_PC_Horizontal";
@@ -131,6 +132,7 @@ public class PlayerController : NetworkBehaviour
     
     private Transform GetTaggedPlayer()
     {
+        Instantiate(tagParticle, transform.position, Quaternion.identity);
         Debug.Log("Searching for tags...");
         Vector3 position = transform.position;
         List<Collider2D> taggedPlayers = Physics2D.OverlapCircleAll(position, taggingRadius, playerLayer).ToList();

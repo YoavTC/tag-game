@@ -169,6 +169,7 @@ public class GameManager : NetworkSingleton<GameManager>
     public void ReceiveTagChange(Transform taggedTransform, Transform taggerTransform)
     {
         Debug.Log(taggedTransform + " TAGGED " + taggerTransform);
+        TaggerDisplay.Instance.SetNewTagger(taggedTransform);
         taggedTransform.GetComponent<PlayerController>().GetTagged();
     }
     #endregion
