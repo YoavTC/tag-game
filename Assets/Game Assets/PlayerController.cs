@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NaughtyAttributes;
 using Unity.Netcode;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -20,8 +21,11 @@ public class PlayerController : NetworkBehaviour
     private Rigidbody2D rb;
 
     [Header("Tagging Settings")] 
-    [SerializeField] [ReadOnly] private bool isTagger;
+    private NetworkVariable<bool> isTaggerNetwork = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
+    [SerializeField] private bool isTagger;
+    [SerializeField] private bool canTag = true;
     [SerializeField] private float taggingRadius;
+    [SerializeField] private float tagCooldown;
     [SerializeField] private GameObject tagParticle;
 
     [Header("Keybinds")] 
@@ -43,7 +47,7 @@ public class PlayerController : NetworkBehaviour
         SetUpBindings();
         
         //Delete other client's controller
-        if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
+        //if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
         
         //Set up variables
         rb = GetComponent<Rigidbody2D>();
@@ -65,6 +69,8 @@ public class PlayerController : NetworkBehaviour
     
     void Update()
     {
+        if (!isLocalGame && !IsOwner && !testingMode) return;
+        
         //Get input movement
         float horizontalDistance = Input.GetAxis(moveInput);
         Vector2 movement = new Vector2(horizontalDistance, 0);
@@ -79,9 +85,10 @@ public class PlayerController : NetworkBehaviour
             else if (extraJumps > 0) Jump(true);
         }
 
-        if (Input.GetButtonDown(tagInput) && isTagger)
+        if (Input.GetButtonDown(tagInput) && isTagger && canTag)
         {
             Tag();
+            StartCoroutine(TagCooldown());
         }
     }
 
@@ -114,68 +121,105 @@ public class PlayerController : NetworkBehaviour
     #endregion
 
     #region Tagging
-
     private void Tag()
     {
-        Transform taggedPlayer = GetTaggedPlayer();
+        Transform taggedPlayer = GetClosestPlayer();
+        Instantiate(tagParticle, transform.position, Quaternion.identity).transform.SetParent(transform);
+        
 
         if (taggedPlayer != null)
         {
             isTagger = false;
-            
-            TitleSystem.Instance.DisplayText("You Tagged " + taggedPlayer+ "!", true, "#d32c2f");
+            if (!isLocalGame) isTaggerNetwork.Value = false;
             
             if (isLocalGame) GameManager.Instance.ClientTagClient(taggedPlayer, transform);
-            else GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
+            else
+            {
+                GameManager.Instance.ClientTagClientServerRpc(taggedPlayer.GetComponent<NetworkBehaviour>().OwnerClientId, OwnerClientId);
+                //Set other
+                TaggerDisplay.Instance.SetNewTagger(taggedPlayer);
+            }
         }
     }
-    
-    private Transform GetTaggedPlayer()
+
+    private void OnDrawGizmos()
     {
-        Instantiate(tagParticle, transform.position, Quaternion.identity);
-        Debug.Log("Searching for tags...");
-        Vector3 position = transform.position;
-        List<Collider2D> taggedPlayers = Physics2D.OverlapCircleAll(position, taggingRadius, playerLayer).ToList();
-        taggedPlayers.Remove(GetComponent<Collider2D>());
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, taggingRadius);
+    }
 
-        if (taggedPlayers.Count > 1)
+    private Transform GetClosestPlayer()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, taggingRadius, playerLayer);
+
+        Transform closestTransform = null;
+        float closestDistance = Mathf.Infinity;
+
+        foreach (Collider2D collider in colliders)
         {
-            Transform closestTaggedPlayer = taggedPlayers[0].transform;
-            float closestDistance = Vector2.Distance(closestTaggedPlayer.position, position);
-
-            for (int i = 0; i < taggedPlayers.Count; i++)
+            if (collider.gameObject != gameObject)
             {
-                float distance = Vector2.Distance(taggedPlayers[i].transform.position, position);
+                float distanceToPlayer = Vector2.Distance(transform.position, collider.transform.position);
 
-                if (distance < closestDistance)
+                if (distanceToPlayer < closestDistance)
                 {
-                    closestTaggedPlayer = taggedPlayers[i].transform;
-                    closestDistance = distance;
+                    closestDistance = distanceToPlayer;
+                    closestTransform = collider.transform;
                 }
             }
-            return closestTaggedPlayer;
-        } 
-        if (taggedPlayers.Count == 1)
-        {
-            return taggedPlayers[0].transform;
         }
 
-        return null;
+        return closestTransform;
     }
+
+    private bool firstTime = true;
 
     public void GetTaggedClient(ulong taggedID)
     {
         if (OwnerClientId == taggedID)
         {
+            //Set self
+            TaggerDisplay.Instance.SetNewTagger(transform);
             isTagger = true;
+            if (!isLocalGame) isTaggerNetwork.Value = true;
             Debug.Log("You got tagged!");
+        }
+        else if (firstTime) {
+            //Set other
+            firstTime = false;
+            StartCoroutine(DelaySetPart());
+        }
+    }
+
+    private IEnumerator DelaySetPart()
+    {
+        yield return HelperFunctions.GetWait(0.25f);
+        PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
+        for (int i = 0; i < playerControllers.Length; i++)
+        {
+            Debug.Log("Looping...");
+            if (playerControllers[i].isTaggerNetwork.Value)
+            {
+                Debug.Log("Found:", playerControllers[i].transform);
+                TaggerDisplay.Instance.SetNewTagger(playerControllers[i].transform);
+            }
         }
     }
 
     public void GetTagged()
     {
+        //Set self
+        TaggerDisplay.Instance.SetNewTagger(transform);
         isTagger = true;
+        if (!isLocalGame) isTaggerNetwork.Value = true;
         Debug.Log("You got tagged!");
+    }
+
+    private IEnumerator TagCooldown()
+    {
+        canTag = false;
+        yield return HelperFunctions.GetWait(tagCooldown);
+        canTag = true;
     }
     #endregion
 

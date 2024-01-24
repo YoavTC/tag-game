@@ -8,6 +8,6 @@ public class TaggerDisplay : Singleton<TaggerDisplay>
     {
         currentTagger = newTaggerTransform;
         transform.SetParent(currentTagger);
-        transform.localPosition = Vector3.zero;
+        transform.localPosition = new Vector3(0, 0, -5);
     }
 }

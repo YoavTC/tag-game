@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using NaughtyAttributes;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class GameManager : NetworkSingleton<GameManager>
@@ -13,9 +12,8 @@ public class GameManager : NetworkSingleton<GameManager>
     [Header("Objects")]
     [SerializeField] public CameraMovement clientCamera;
     [SerializeField] private GameObject playerPrefab;
-
-    [Header("Network Variables")] 
-    private bool isKeyboardInputType;
+    
+    [Header("Network Variables")]
     public bool isLocalGame;
     [SerializeField] private NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
     [SerializeField] private NetworkVariable<ulong> taggedPlayerClientID = new NetworkVariable<ulong>(57);
@@ -28,14 +26,11 @@ public class GameManager : NetworkSingleton<GameManager>
     {
         //Check if game is local or not
         isLocalGame = NetworkModeCommunicator.isGameLocal;
-        isKeyboardInputType = NetworkModeCommunicator.isKeyboard;
         
         //If game is local, set up local play game state. Else, set up network game state
         if (isLocalGame) currentLocalGameState = GameState.PRE;
         else currentNetworkGameState.Value = GameState.PRE;
     }
-    
-    
     public void StartGame()
     {
         if (isLocalGame)
@@ -45,11 +40,7 @@ public class GameManager : NetworkSingleton<GameManager>
         }
         else
         {
-            if (!IsHost)
-            {
-                Debug.Log("Only the host can start the game!"); //display text on screen
-            } else
-            {
+            if (IsHost) {
                 ChangeLocalGameStateClientRpc(GameState.STARTING);
             
                 //Tag random player
@@ -62,14 +53,8 @@ public class GameManager : NetworkSingleton<GameManager>
             } 
         }
     }
-
-    #region Multiplayer Manager Logic
-    [ClientRpc]
-    private void TagRandomPlayerClientRpc(ulong randomClientID)
-    {
-        clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(randomClientID);
-    }
     
+    #region Multiplayer Manager Logic
     [ClientRpc]
     public void ChangeLocalGameStateClientRpc(GameState newGameState)
     {
@@ -99,6 +84,11 @@ public class GameManager : NetworkSingleton<GameManager>
         if (IsHost) currentNetworkGameState.Value = newGameState;
     }
     
+    [ClientRpc]
+    private void TagRandomPlayerClientRpc(ulong randomClientID)
+    {
+        clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(randomClientID);
+    }
     
     //Runs on server when client tags client
     [ServerRpc(RequireOwnership = false)]
@@ -110,7 +100,7 @@ public class GameManager : NetworkSingleton<GameManager>
 
     //Runs on every client upon tag change
     [ClientRpc]
-    public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID)
+    public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID )
     {
         Debug.Log(taggerID + " TAGGED " + taggedID);
         clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(taggedID);
@@ -118,12 +108,6 @@ public class GameManager : NetworkSingleton<GameManager>
     #endregion
 
     #region LocalPlay Manager Logic
-    private void TagRandomPlayer()
-    {
-        PlayerController[] allPlayers = FindObjectsOfType<PlayerController>();
-        allPlayers[Random.Range(0, allPlayers.Length)].GetTagged();
-    }
-    
     public void ChangeLocalGameState(GameState newGameState)
     {
         switch (newGameState)
@@ -157,6 +141,12 @@ public class GameManager : NetworkSingleton<GameManager>
         currentLocalGameState = newGameState;
     }
     
+    private void TagRandomPlayer()
+    {
+        PlayerController[] allPlayers = FindObjectsOfType<PlayerController>();
+        PlayerController randomPlayer = allPlayers[Random.Range(0, allPlayers.Length)];
+        randomPlayer.GetTagged();
+    }
     
     //Runs on server when client tags client
     public void ClientTagClient(Transform taggedTransform, Transform taggerTransform)
@@ -168,8 +158,7 @@ public class GameManager : NetworkSingleton<GameManager>
     //Runs on every client upon tag change
     public void ReceiveTagChange(Transform taggedTransform, Transform taggerTransform)
     {
-        Debug.Log(taggedTransform + " TAGGED " + taggerTransform);
-        TaggerDisplay.Instance.SetNewTagger(taggedTransform);
+        Debug.Log(taggedTransform + " TAGGED " + taggerTransform, taggerTransform);
         taggedTransform.GetComponent<PlayerController>().GetTagged();
     }
     #endregion
