@@ -54,7 +54,6 @@ public class GameManager : NetworkSingleton<GameManager>
         }
     }
     
-    #region Multiplayer Manager Logic
     [ClientRpc]
     public void ChangeLocalGameStateClientRpc(GameState newGameState)
     {
@@ -83,31 +82,6 @@ public class GameManager : NetworkSingleton<GameManager>
         
         if (IsHost) currentNetworkGameState.Value = newGameState;
     }
-    
-    [ClientRpc]
-    private void TagRandomPlayerClientRpc(ulong randomClientID)
-    {
-        clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(randomClientID);
-    }
-    
-    //Runs on server when client tags client
-    [ServerRpc(RequireOwnership = false)]
-    public void ClientTagClientServerRpc(ulong taggedID, ulong taggerID)
-    {
-        taggedPlayerClientID.Value = taggedID;
-        ReceiveTagChangeClientRpc(taggedID, taggerID);
-    }
-
-    //Runs on every client upon tag change
-    [ClientRpc]
-    public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID )
-    {
-        Debug.Log(taggerID + " TAGGED " + taggedID);
-        clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(taggedID);
-    }
-    #endregion
-
-    #region LocalPlay Manager Logic
     public void ChangeLocalGameState(GameState newGameState)
     {
         switch (newGameState)
@@ -141,6 +115,11 @@ public class GameManager : NetworkSingleton<GameManager>
         currentLocalGameState = newGameState;
     }
     
+    [ClientRpc]
+    private void TagRandomPlayerClientRpc(ulong randomClientID)
+    {
+        clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(randomClientID);
+    }
     private void TagRandomPlayer()
     {
         PlayerController[] allPlayers = FindObjectsOfType<PlayerController>();
@@ -149,6 +128,12 @@ public class GameManager : NetworkSingleton<GameManager>
     }
     
     //Runs on server when client tags client
+    [ServerRpc(RequireOwnership = false)]
+    public void ClientTagClientServerRpc(ulong taggedID, ulong taggerID)
+    {
+        taggedPlayerClientID.Value = taggedID;
+        ReceiveTagChangeClientRpc(taggedID, taggerID);
+    }
     public void ClientTagClient(Transform taggedTransform, Transform taggerTransform)
     {
         taggedPlayerTransform = taggedTransform;
@@ -156,12 +141,17 @@ public class GameManager : NetworkSingleton<GameManager>
     }
 
     //Runs on every client upon tag change
+    [ClientRpc]
+    public void ReceiveTagChangeClientRpc(ulong taggedID, ulong taggerID )
+    {
+        Debug.Log(taggerID + " TAGGED " + taggedID);
+        clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(taggedID);
+    }
     public void ReceiveTagChange(Transform taggedTransform, Transform taggerTransform)
     {
         Debug.Log(taggedTransform + " TAGGED " + taggerTransform, taggerTransform);
         taggedTransform.GetComponent<PlayerController>().GetTagged();
     }
-    #endregion
 }
 
 public enum GameState

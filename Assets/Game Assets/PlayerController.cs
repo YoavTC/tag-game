@@ -91,6 +91,9 @@ public class PlayerController : NetworkBehaviour
             StartCoroutine(TagCooldown());
         }
     }
+    
+    //Draw tag radius
+    //private void OnDrawGizmos() { Gizmos.color = Color.red; Gizmos.DrawWireSphere(transform.position, taggingRadius); }
 
     #region Jumping & Ground
     //Jump logic
@@ -142,12 +145,6 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, taggingRadius);
-    }
-
     private Transform GetClosestPlayer()
     {
         Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, taggingRadius, playerLayer);
@@ -173,6 +170,15 @@ public class PlayerController : NetworkBehaviour
     }
 
     private bool firstTime = true;
+    
+    public void GetTagged()
+    {
+        //Set self
+        TaggerDisplay.Instance.SetNewTagger(transform);
+        isTagger = true;
+        if (!isLocalGame) isTaggerNetwork.Value = true;
+        Debug.Log("You got tagged!");
+    }
 
     public void GetTaggedClient(ulong taggedID)
     {
@@ -204,15 +210,6 @@ public class PlayerController : NetworkBehaviour
                 TaggerDisplay.Instance.SetNewTagger(playerControllers[i].transform);
             }
         }
-    }
-
-    public void GetTagged()
-    {
-        //Set self
-        TaggerDisplay.Instance.SetNewTagger(transform);
-        isTagger = true;
-        if (!isLocalGame) isTaggerNetwork.Value = true;
-        Debug.Log("You got tagged!");
     }
 
     private IEnumerator TagCooldown()
