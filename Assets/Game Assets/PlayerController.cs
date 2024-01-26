@@ -18,6 +18,8 @@ public class PlayerController : NetworkBehaviour
 
     [Header("Movement Settings")] 
     [SerializeField] private float moveSpeed;
+    [SerializeField] private float slamSpeed;
+    [SerializeField] private float jumpForce;
     private Rigidbody2D rb;
 
     [Header("Tagging Settings")] 
@@ -29,12 +31,12 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private GameObject tagParticle;
 
     [Header("Keybinds")] 
-    [SerializeField] [ReadOnly] private string moveInput = "M_PC_Horizontal";
-    [SerializeField] [ReadOnly] private string jumpInput = "L_PC1_Jump";
-    [SerializeField] [ReadOnly] private string tagInput = "L_PC1_Tag";
+    private string moveInput = "M_PC_Horizontal";
+    private string jumpInput = "L_PC1_Jump";
+    private string tagInput = "L_PC1_Tag";
+    private string slamInput = "L_PC1_Slam";
     
     private LayerMask playerLayer;
-    [SerializeField] private float jumpForce;
     private bool isOnGround;
     private int extraJumps = 1;
     
@@ -85,6 +87,11 @@ public class PlayerController : NetworkBehaviour
         {
             Tag();
             StartCoroutine(TagCooldown());
+        }
+
+        if (Input.GetButtonDown(slamInput))
+        {
+            rb.velocity = new Vector2(rb.velocity.x, slamSpeed);
         }
     }
     
@@ -227,14 +234,15 @@ public class PlayerController : NetworkBehaviour
             moveInput = inputMap.moveInputName;
             jumpInput = inputMap.jumpInputName;
             tagInput = inputMap.tagInputName;
+            slamInput = inputMap.slamInputName;
         }
         else
         {
             moveInput = "M_PC_Horizontal";
             jumpInput = "M_PC_Jump";
             tagInput = "M_PC_Tag";
+            slamInput = "M_PC_Slam";
         }
-        
     }
     #endregion
 }

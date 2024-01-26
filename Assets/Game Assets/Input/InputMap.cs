@@ -8,4 +8,5 @@ public class InputMap : ScriptableObject
     public string jumpInputName;
     public string moveInputName;
     public string tagInputName;
+    public string slamInputName;
 }
