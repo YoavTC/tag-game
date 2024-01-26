@@ -145,6 +145,8 @@ public class PlayerController : NetworkBehaviour
                 //Set other
                 TaggerDisplay.Instance.SetNewTagger(taggedPlayer);
             }
+            
+            TitleSystem.Instance.DisplayText("You tagged someone!!", true, "#4285f4");
         }
     }
 
