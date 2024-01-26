@@ -15,7 +15,7 @@ public class GameManager : NetworkSingleton<GameManager>
     
     [Header("Network Variables")]
     public bool isLocalGame;
-    [SerializeField] private NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
+    [SerializeField] public NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
     [SerializeField] private NetworkVariable<ulong> taggedPlayerClientID = new NetworkVariable<ulong>(57);
     
     [SerializeField] private GameState currentLocalGameState;
@@ -70,6 +70,11 @@ public class GameManager : NetworkSingleton<GameManager>
                     clientCamera.SetFollowPlayerState(true);
                     TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
                     //Start Game
+                    PlayerController[] players = FindObjectsOfType<PlayerController>();
+                    for (int i = 0; i < players.Length; i++)
+                    {
+                        SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
+                    }
                 }
                 break;
             case GameState.ACTIVE:
@@ -80,7 +85,11 @@ public class GameManager : NetworkSingleton<GameManager>
                 break;
         }
         
-        if (IsHost) currentNetworkGameState.Value = newGameState;
+        if (IsHost)
+        {
+            currentNetworkGameState.Value = newGameState;
+            currentLocalGameState = newGameState;
+        }
     }
     public void ChangeLocalGameState(GameState newGameState)
     {
@@ -98,10 +107,15 @@ public class GameManager : NetworkSingleton<GameManager>
                     var tempCam = GameObject.FindWithTag("TempCamera").AddComponent<CameraMovement>();
                     tempCam.GetComponent<CameraMovement>().MoveToPosition(new Vector3(-1.5f,16,-10));
                     tempCam.GetComponent<Camera>().orthographicSize = 22.5f;
-                    
-                    //Start game
                     startGameAnimator.AnimateConnectUIOut();
                     TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
+                    
+                    //Start game
+                    PlayerController[] players = FindObjectsOfType<PlayerController>();
+                    for (int i = 0; i < players.Length; i++)
+                    {
+                        SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
+                    }
                 }
                 break;
             case GameState.ACTIVE:

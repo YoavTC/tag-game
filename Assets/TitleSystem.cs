@@ -18,6 +18,9 @@ public class TitleSystem : Singleton<TitleSystem>
     {
         TMP_Text newText = gameObject.GetComponent<TMP_Text>();
 
+        //Reset
+        newText.DOKill();
+        
         newText.enabled = false;
         newText.alignment = TextAlignmentOptions.Center;
         newText.verticalAlignment = VerticalAlignmentOptions.Middle;

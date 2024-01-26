@@ -31,6 +31,7 @@ public class CameraMovement : MonoBehaviour
     public void SetFollowPlayerState(bool state)
     {
         followPlayer = state;
+        GetComponent<Camera>().orthographicSize = 20f;
     }
     
     public void InitiateCameraSettings(Transform targetTransform)

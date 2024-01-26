@@ -54,17 +54,13 @@ public class PlayerController : NetworkBehaviour
         playerLayer = LayerMask.GetMask("Player");
 
         //Spawn camera
-        if (isLocalGame)
-        {
-            //TODO Set up local camera
-        } else if (IsOwner)
+        if (!isLocalGame && IsOwner)
         {
             CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
             clientCamera.InitiateCameraSettings(transform);
-        }
+        } 
         
-        //Set player's position
-        SpawnManager.Instance.SetSpawnPoint(transform);
+        if (!isLocalGame) SpawnManager.Instance.SetSpawnPoint(transform, true);
     }
     
     void Update()
@@ -178,6 +174,7 @@ public class PlayerController : NetworkBehaviour
         isTagger = true;
         if (!isLocalGame) isTaggerNetwork.Value = true;
         Debug.Log("You got tagged!");
+        TitleSystem.Instance.DisplayText("You got TAGGED!!", true, "#c33232");
     }
 
     public void GetTaggedClient(ulong taggedID)
@@ -189,6 +186,7 @@ public class PlayerController : NetworkBehaviour
             isTagger = true;
             if (!isLocalGame) isTaggerNetwork.Value = true;
             Debug.Log("You got tagged!");
+            TitleSystem.Instance.DisplayText("You got TAGGED!!", true, "#c33232");
         }
         else if (firstTime) {
             //Set other
