@@ -20,6 +20,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float slamSpeed;
     [SerializeField] private float jumpForce;
+    public bool canBoost;
     private Rigidbody2D rb;
 
     [Header("Tagging Settings")] 
@@ -123,6 +124,11 @@ public class PlayerController : NetworkBehaviour
         {
             isOnGround = false;
         }
+    }
+
+    public void BoostPlayer(float boostStrength)
+    {
+        rb.velocity += new Vector2(0, boostStrength);
     }
     #endregion
 
