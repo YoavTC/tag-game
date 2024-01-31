@@ -1,12 +1,6 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using NaughtyAttributes;
 using Unity.Netcode;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class PlayerController : NetworkBehaviour
 {
@@ -31,7 +25,7 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float tagCooldown;
     [SerializeField] private GameObject tagParticle;
 
-    [Header("Keybinds")] 
+    [Header("Key Binds")] 
     private string moveInput = "M_PC_Horizontal";
     private string jumpInput = "L_PC1_Jump";
     private string tagInput = "L_PC1_Tag";
@@ -47,7 +41,8 @@ public class PlayerController : NetworkBehaviour
         Debug.Log("Player spawned!", transform);
         isLocalGame = GameManager.Instance.isLocalGame;
         
-        SetUpBindings();
+        SetupBindings();
+        SetupWaistband();  
         
         //Delete other client's controller
         //if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
@@ -232,9 +227,8 @@ public class PlayerController : NetworkBehaviour
         canTag = true;
     }
     #endregion
-
-    #region Input Bindings
-    public void SetUpBindings()
+    
+    private void SetupBindings()
     {
         if (isLocalGame)
         {
@@ -252,5 +246,10 @@ public class PlayerController : NetworkBehaviour
             slamInput = "M_PC_Slam";
         }
     }
-    #endregion
+
+    private void SetupWaistband()
+    {
+        Debug.Log(OwnerClientId);
+        GetComponent<SpriteSwapper>().SetColor((int) OwnerClientId);
+    }
 }
