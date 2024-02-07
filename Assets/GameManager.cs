@@ -1,8 +1,7 @@
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
-using Unity.Netcode.Components;
 using UnityEngine;
-using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class GameManager : NetworkSingleton<GameManager>
@@ -20,7 +19,8 @@ public class GameManager : NetworkSingleton<GameManager>
     
     [SerializeField] private GameState currentLocalGameState;
     [SerializeField] private Transform taggedPlayerTransform;
-    
+
+    public Dictionary<ulong, Transform> localClientTransforms = new Dictionary<ulong, Transform>();
     
     void Start()
     {
@@ -31,6 +31,7 @@ public class GameManager : NetworkSingleton<GameManager>
         if (isLocalGame) currentLocalGameState = GameState.PRE;
         else currentNetworkGameState.Value = GameState.PRE;
     }
+    
     public void StartGame()
     {
         if (isLocalGame)
@@ -73,6 +74,7 @@ public class GameManager : NetworkSingleton<GameManager>
                     PlayerController[] players = FindObjectsOfType<PlayerController>();
                     for (int i = 0; i < players.Length; i++)
                     {
+                        localClientTransforms.Add(players[i].OwnerClientId ,players[i].transform);
                         SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
                     }
                 }
@@ -160,11 +162,17 @@ public class GameManager : NetworkSingleton<GameManager>
     {
         Debug.Log(taggerID + " TAGGED " + taggedID);
         clientCamera.playerTransform.GetComponent<PlayerController>().GetTaggedClient(taggedID);
+        
+        //Update client about tagging change
+        TaggerDisplay.Instance.SetNewTagger(localClientTransforms[taggedID]);
     }
     public void ReceiveTagChange(Transform taggedTransform, Transform taggerTransform)
     {
         Debug.Log(taggedTransform + " TAGGED " + taggerTransform, taggerTransform);
         taggedTransform.GetComponent<PlayerController>().GetTagged();
+        
+        //Update about tagging change
+        TaggerDisplay.Instance.SetNewTagger(taggedTransform);
     }
 }
 

@@ -1,4 +1,6 @@
 using System.Collections;
+using DG.Tweening;
+using Unity.Multiplayer.Samples.Utilities.ClientAuthority;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -45,7 +47,7 @@ public class PlayerController : NetworkBehaviour
         SetupWaistband();  
         
         //Delete other client's controller
-        //if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
+        // if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
         
         //Set up variables
         rb = GetComponent<Rigidbody2D>();
@@ -56,7 +58,10 @@ public class PlayerController : NetworkBehaviour
         {
             CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
             clientCamera.InitiateCameraSettings(transform);
-        } 
+        }
+
+        //transform.position = new Vector3(transform.position.x, transform.position.y, -5f);
+        // transform.DOMoveZ(-5f, 1f);
         
         if (!isLocalGame) SpawnManager.Instance.SetSpawnPoint(transform, true);
     }
@@ -211,10 +216,8 @@ public class PlayerController : NetworkBehaviour
         PlayerController[] playerControllers = FindObjectsOfType<PlayerController>();
         for (int i = 0; i < playerControllers.Length; i++)
         {
-            Debug.Log("Looping...");
             if (playerControllers[i].isTaggerNetwork.Value)
             {
-                Debug.Log("Found:", playerControllers[i].transform);
                 TaggerDisplay.Instance.SetNewTagger(playerControllers[i].transform);
             }
         }
