@@ -16,17 +16,20 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float moveSpeed;
     [SerializeField] private float slamSpeed;
     [SerializeField] private float jumpForce;
-    public bool canBoost;
     private Rigidbody2D rb;
 
     [Header("Tagging Settings")] 
-    private NetworkVariable<bool> isTaggerNetwork = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
     [SerializeField] private bool isTagger;
     [SerializeField] private bool canTag = true;
     [SerializeField] private float taggingRadius;
     [SerializeField] private float tagCooldown;
-    [SerializeField] private GameObject tagParticle;
+    private NetworkVariable<bool> isTaggerNetwork = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
 
+    [Header("Particles")]
+    [SerializeField] private GameObject tagParticle;
+    [SerializeField] private GameObject jumpParticle;
+    
+    
     [Header("Key Binds")] 
     private string moveInput = "M_PC_Horizontal";
     private string jumpInput = "L_PC1_Jump";
@@ -105,6 +108,8 @@ public class PlayerController : NetworkBehaviour
     {
         if (isDouble) extraJumps--;
         else extraJumps = 1;
+
+        if (!isOnGround) Instantiate(jumpParticle, transform);
         
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
     }
@@ -152,7 +157,7 @@ public class PlayerController : NetworkBehaviour
                 TaggerDisplay.Instance.SetNewTagger(taggedPlayer);
             }
             
-            TitleSystem.Instance.DisplayText("You tagged someone!!", true, "#4285f4");
+            TitleSystem.Instance.DisplayText(isLocalGame ? "You tagged someone!!":"Tagged!!", true, "#4285f4");
         }
     }
 

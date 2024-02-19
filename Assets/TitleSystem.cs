@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using NaughtyAttributes;
@@ -7,6 +8,15 @@ using UnityEngine;
 public class TitleSystem : Singleton<TitleSystem>
 {
     [SerializeField] float fadeDuration;
+    private bool isLocalGame;
+
+    private TMP_Text titleText;
+
+    private void Start()
+    {
+        isLocalGame = GameManager.Instance.isLocalGame;
+        titleText = gameObject.GetComponent<TMP_Text>();
+    }
 
     [Button]
     public void TestTitle()
@@ -14,35 +24,33 @@ public class TitleSystem : Singleton<TitleSystem>
         DisplayText("testing!!!", true, "#B4E14C");
     }
     
-    public void DisplayText(string text, bool fade, string color = "#FFFFFF")
+    public void DisplayText(string text, bool fade, string color = "#FFFFFF", bool local = false)
     {
-        TMP_Text newText = gameObject.GetComponent<TMP_Text>();
-
         //Reset
-        newText.DOKill();
+        titleText.DOKill();
         
-        newText.enabled = false;
-        newText.alignment = TextAlignmentOptions.Center;
-        newText.verticalAlignment = VerticalAlignmentOptions.Middle;
-        newText.enableAutoSizing = true;
-        newText.fontStyle = FontStyles.Bold;
+        titleText.enabled = false;
+        titleText.alignment = TextAlignmentOptions.Center;
+        titleText.verticalAlignment = VerticalAlignmentOptions.Middle;
+        titleText.enableAutoSizing = true;
+        titleText.fontStyle = FontStyles.Bold;
         // GetComponent<RectTransform>().anchoredPosition = Vector2.zero; 
 
-        newText.color = HelperFunctions.HexToColor(color);
-        newText.text = text;
+        titleText.color = HelperFunctions.HexToColor(color);
+        titleText.text = text;
         
 
         if (fade)
         {
-            newText.DOFade(0, 0f);
-            newText.enabled = true;
-            newText.DOFade(1, fadeDuration).SetEase(Ease.InOutSine).OnComplete(() => 
-                    newText.DOFade(0, fadeDuration * 1.5f).SetDelay(1.5f));
+            titleText.DOFade(0, 0f);
+            titleText.enabled = true;
+            titleText.DOFade(1, fadeDuration).SetEase(Ease.InOutSine).OnComplete(() => 
+                    titleText.DOFade(0, fadeDuration * 1.5f).SetDelay(1.5f));
         }
         else
         {
-            newText.enabled = true;
-            StartCoroutine(RemoveText(newText));
+            titleText.enabled = true;
+            StartCoroutine(RemoveText(titleText));
         }
     }
 

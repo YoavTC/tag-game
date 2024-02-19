@@ -5,21 +5,29 @@ using UnityEngine;
 
 public class JumpPad : MonoBehaviour
 {
-    [SerializeField] private float boostStrength;
+    [SerializeField] private float jumpForce;
     
-    private void OnTriggerStay2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.TryGetComponent(out PlayerController playerController) && playerController.canBoost)
+        if (other.TryGetComponent(out PlayerController playerController))
         {
-            playerController.BoostPlayer(boostStrength);
-            StartCoroutine(BoostCooldown(playerController));
+            LaunchRigidbody(playerController.GetComponent<Rigidbody2D>());
         }
     }
 
-    private IEnumerator BoostCooldown(PlayerController playerController)
+    private void LaunchRigidbody(Rigidbody2D rb)
     {
-        playerController.canBoost = false;
-        yield return HelperFunctions.GetWait(0.5f);
-        playerController.canBoost = true;
+        float yVelocity = rb.velocity.y;
+        
+        rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        
+        if (yVelocity < -1)
+        {
+            Debug.Log("yVel: " + yVelocity);
+            rb.AddForce(Vector2.up * jumpForce * Math.Abs(yVelocity), ForceMode2D.Impulse);
+        } else rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        
+        
     }
 }

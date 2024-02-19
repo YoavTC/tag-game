@@ -84,7 +84,7 @@ public class Relay : MonoBehaviour
             createRelayButton.interactable = false;
             joinRelayButton.interactable = false;
             
-            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(4);
+            Allocation allocation = await RelayService.Instance.CreateAllocationAsync(8);
             joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             
             NetworkManager.Singleton.GetComponent<UnityTransport>().SetHostRelayData(
