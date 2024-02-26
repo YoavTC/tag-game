@@ -9,17 +9,15 @@ using UnityEngine.UI;
 
 public class MenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("Visual Settings")] 
-    [SerializeField] private Color selectedColor = Color.white, defaultColor = Color.black;
     [SerializeField] float shadowTransitionDuration = .2f;
     
-    private TMP_Text buttonText;
     private Shadow buttonShadow;
+    private Tabs tabsManager;
 
     private void Start()
     {
-        buttonText = transform.GetChild(0).GetComponent<TMP_Text>();
-        buttonShadow = GetComponent<Shadow>();  
+        buttonShadow = GetComponent<Shadow>();
+        tabsManager = transform.parent.GetComponent<Tabs>();
     }
     
     // public void OnClick()
@@ -29,24 +27,14 @@ public class MenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPoin
 
     public void OnSelect(BaseEventData eventData)
     {
-        buttonText.color = selectedColor;
+        tabsManager.ClickedTab(transform);
     }
 
     public void OnDeselect(BaseEventData eventData)
     {
-        buttonText.color = defaultColor;
+        
     }
-
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        AnimateShadow();
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        AnimateShadow(true);
-    }
-
+    
     private void AnimateShadow(bool isOut = false)
     {
         buttonShadow.DOKill();
@@ -60,4 +48,7 @@ public class MenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPoin
                 buttonShadow.effectDistance = currentVector;
             });
     }
+    
+    public void OnPointerEnter(PointerEventData eventData) => AnimateShadow();
+    public void OnPointerExit(PointerEventData eventData) => AnimateShadow(true);
 }
