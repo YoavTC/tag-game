@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using AYellowpaper.SerializedCollections;
 using TMPro;
 using UnityEngine;
@@ -13,7 +15,23 @@ public class Tabs : MonoBehaviour
     [SerializeField] private SerializedDictionary<Transform, Transform>
         tabsDictionary = new SerializedDictionary<Transform, Transform>();
 
+    private void Start()
+    {
+        HideTabsContent(transform);
+    }
+
     public void ClickedTab(Transform tabTransform)
+    {
+        HideTabsContent(tabTransform);
+
+        tabTransform.GetChild(0).GetComponent<TMP_Text>().color = selectedColor;
+        tabTransform.GetComponent<Image>().sprite = enabledSprite;
+        
+        GameObject tabContent = tabsDictionary[tabTransform].gameObject;
+        tabContent.SetActive(true);
+    }
+    
+    private void HideTabsContent(Transform tabTransform)
     {
         foreach (var tab in tabsDictionary)
         {
@@ -24,11 +42,5 @@ public class Tabs : MonoBehaviour
                 tab.Value.gameObject.SetActive(false);
             }
         }
-
-        tabTransform.GetChild(0).GetComponent<TMP_Text>().color = selectedColor;
-        tabTransform.GetComponent<Image>().sprite = enabledSprite;
-        
-        GameObject tabContent = tabsDictionary[tabTransform].gameObject;
-        tabContent.SetActive(true);
     }
 }
