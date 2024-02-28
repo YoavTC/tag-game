@@ -15,6 +15,8 @@ public class Tabs : MonoBehaviour
     [SerializeField] private SerializedDictionary<Transform, Transform>
         tabsDictionary = new SerializedDictionary<Transform, Transform>();
 
+    [SerializeField] private bool visualChanges = false;
+
     private void Start()
     {
         HideTabsContent(transform);
@@ -24,8 +26,11 @@ public class Tabs : MonoBehaviour
     {
         HideTabsContent(tabTransform);
 
-        tabTransform.GetChild(0).GetComponent<TMP_Text>().color = selectedColor;
-        tabTransform.GetComponent<Image>().sprite = enabledSprite;
+        if (visualChanges)
+        {
+            tabTransform.GetChild(0).GetComponent<TMP_Text>().color = selectedColor;
+            tabTransform.GetComponent<Image>().sprite = enabledSprite; 
+        }
         
         GameObject tabContent = tabsDictionary[tabTransform].gameObject;
         tabContent.SetActive(true);
@@ -37,8 +42,11 @@ public class Tabs : MonoBehaviour
         {
             if (tab.Value != tabTransform)
             {
-                tab.Key.GetComponent<Image>().sprite = disabledSprite;
-                tab.Key.GetChild(0).GetComponent<TMP_Text>().color = defaultColor;
+                if (visualChanges)
+                {
+                    tab.Key.GetComponent<Image>().sprite = disabledSprite;
+                    tab.Key.GetChild(0).GetComponent<TMP_Text>().color = defaultColor;
+                }
                 tab.Value.gameObject.SetActive(false);
             }
         }
