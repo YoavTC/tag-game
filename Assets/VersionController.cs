@@ -53,9 +53,4 @@ public class VersionController : MonoBehaviour
             versionMismatchNotifier.SetActive(true);
         }
     }
-
-    public void CloseNotifier()
-    {
-        versionMismatchNotifier.SetActive(false);
-    }
 }

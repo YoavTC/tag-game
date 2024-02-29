@@ -14,6 +14,7 @@ public class PlayerController : NetworkBehaviour
 
     [Header("Movement Settings")] 
     [SerializeField] private float moveSpeed;
+    private float taggerMoveSpeed;
     [SerializeField] private float slamSpeed;
     [SerializeField] private float jumpForce;
     private Rigidbody2D rb;
@@ -38,6 +39,7 @@ public class PlayerController : NetworkBehaviour
     
     private LayerMask playerLayer;
     private bool isOnGround;
+    private int doubleJumps;
     private int extraJumps = 1;
     
     
@@ -47,7 +49,8 @@ public class PlayerController : NetworkBehaviour
         isLocalGame = GameManager.Instance.isLocalGame;
         
         SetupBindings();
-        SetupWaistband();  
+        SetupWaistband();
+        SetupGameSettings();
         
         //Delete other client's controller
         // if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
@@ -62,9 +65,6 @@ public class PlayerController : NetworkBehaviour
             CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
             clientCamera.InitiateCameraSettings(transform);
         }
-
-        //transform.position = new Vector3(transform.position.x, transform.position.y, -5f);
-        // transform.DOMoveZ(-5f, 1f);
         
         if (!isLocalGame) SpawnManager.Instance.SetSpawnPoint(transform, true);
     }
@@ -78,7 +78,7 @@ public class PlayerController : NetworkBehaviour
         Vector2 movement = new Vector2(horizontalDistance, 0);
 
         //Apply movement velocity to the player's rigidbody
-        rb.velocity = new Vector2(movement.x * moveSpeed, rb.velocity.y);
+        rb.velocity = new Vector2(movement.x * (isTagger ? taggerMoveSpeed : moveSpeed), rb.velocity.y);
         
         //jump detection
         if (Input.GetButtonDown(jumpInput))
@@ -107,7 +107,7 @@ public class PlayerController : NetworkBehaviour
     private void Jump(bool isDouble)
     {
         if (isDouble) extraJumps--;
-        else extraJumps = 1;
+        else extraJumps = doubleJumps;
 
         if (!isOnGround) Instantiate(jumpParticle, transform);
         
@@ -120,7 +120,7 @@ public class PlayerController : NetworkBehaviour
         if (other.gameObject.layer != playerLayer)
         {
             isOnGround = true;
-            extraJumps = 1;
+            extraJumps = doubleJumps;
         }
     }
     private void OnTriggerExit2D(Collider2D other)
@@ -259,5 +259,14 @@ public class PlayerController : NetworkBehaviour
     {
         Debug.Log(OwnerClientId);
         GetComponent<SpriteSwapper>().SetColor((int) OwnerClientId);
+    }
+
+    private void SetupGameSettings()
+    {
+        GameData gameData = GameSettingsManager.Instance.GetGameSettings();
+        moveSpeed *= gameData.speedMultiplier;
+        jumpForce *= gameData.jumpMultiplier;
+        doubleJumps = (int) gameData.doubleJumps;
+        taggerMoveSpeed = moveSpeed * gameData.taggerSpeedMultiplier;
     }
 }

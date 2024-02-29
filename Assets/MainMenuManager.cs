@@ -1,12 +1,21 @@
 using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] private GameData gameDataSettings;
 
-    [Header("UI Settings")]
+    private void Start()
+    {
+        //Reset join code
+        gameDataSettings.joinCode = "NULL";
+    }
+    
+    #region Create
+    [Header("Create UI Settings")]
     [SerializeField] private Toggle isOnlineToggle;
     [SerializeField] private Transform[] tabs = new Transform[3];
     [SerializeField] private Slider[] 
@@ -16,7 +25,6 @@ public class MainMenuManager : MonoBehaviour
         tagStunSliders,
         doubleJumpSliders,
         eliminationTimeSliders;
-    
     
     public void StartGame()
     {
@@ -31,13 +39,26 @@ public class MainMenuManager : MonoBehaviour
 
         gameDataSettings.gameModeType = tabIndex;
         gameDataSettings.isOnline = isOnlineToggle.isOn;
+        gameDataSettings.isHost = true;
+        gameDataSettings.joinCode = "NULL";
         
         gameDataSettings.speedMultiplier = speedSliders[tabIndex].value;
         gameDataSettings.jumpMultiplier = jumpSliders[tabIndex].value;
         gameDataSettings.taggerSpeedMultiplier = taggerSpeedSliders[tabIndex].value;
-        //gameDataSettings.tagStunDuration = tagStunSliders[tabIndex].value;
-        //gameDataSettings.doubleJumps = doubleJumpSliders[tabIndex].value;
+        gameDataSettings.tagStunDuration = tagStunSliders[tabIndex].value;
+        gameDataSettings.doubleJumps = doubleJumpSliders[tabIndex].value;
         if (tabIndex == 2) gameDataSettings.eliminationTime = eliminationTimeSliders[0].value;
+        //Move Scene
+        SceneManager.LoadScene("GameScene");
+    }
+    #endregion
+
+    [SerializeField] private TMP_InputField codeInputField;
+    public void JoinGame()
+    {
+        gameDataSettings.isHost = false;
+        gameDataSettings.joinCode = codeInputField.text;
+        //Move Scene
+        SceneManager.LoadScene("GameScene");
     }
 }
-

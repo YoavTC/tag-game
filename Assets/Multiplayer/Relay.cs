@@ -16,10 +16,9 @@ using UnityEngine.UI;
 
 public class Relay : MonoBehaviour
 {
-    [SerializeField] private TMP_InputField inputField;
+    [SerializeField] private GameData gameData;
     [SerializeField] private TMP_Text codeDisplay;
-    [SerializeField] private UIAnimator connectUIAnimator, startUIAnimator;
-    [SerializeField] private Button createRelayButton, joinRelayButton;
+    [SerializeField] private UIAnimator startUIAnimator;
     
     private string joinCode;
 
@@ -34,20 +33,17 @@ public class Relay : MonoBehaviour
         if (GameManager.Instance.isLocalGame)
         {
             Debug.Log("Starting Local Game...");
-            inputField.enabled = false;
-            connectUIAnimator.enabled = false;
-            joinRelayButton.interactable = false;
-            createRelayButton.interactable = false;
-            ConnectToRoom();
-            
-            //codeDisplay.alpha = 0f;
-        } else {
+            GameManager.Instance.ChangeLocalGameState(GameState.STARTING);
+            //ConnectToRoom();
+        }
+        else
+        {
             Debug.Log("Starting Online Game...");
             InitializationOptions hostOptions = new InitializationOptions().SetProfile("host");
             InitializationOptions clientOptions = new InitializationOptions().SetProfile("client");
-        
+
             await UnityServices.InitializeAsync(hostOptions);
-        
+
             AuthenticationService.Instance.SignedIn += () =>
             {
                 Debug.Log("Signed in: " + AuthenticationService.Instance.PlayerId);
@@ -59,18 +55,17 @@ public class Relay : MonoBehaviour
                 AuthenticationService.Instance.SignOut();
                 await UnityServices.InitializeAsync(clientOptions);
             }
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-        }
-    }
 
-    public void OnInputType()
-    {
-        inputField.text = inputField.text.ToUpper();
+            await AuthenticationService.Instance.SignInAnonymouslyAsync();
+            if (gameData.isHost)
+            {
+                CreateRelay();
+            } else JoinRelay();
+        }
     }
 
     private void ConnectToRoom()
     {
-        connectUIAnimator.AnimateConnectUIOut();
         startUIAnimator.AnimateStartUIIn();
         GameManager.Instance.ChangeLocalGameStateClientRpc(GameState.PRE);
     }
@@ -81,9 +76,6 @@ public class Relay : MonoBehaviour
         if (GameManager.Instance.isLocalGame) return;
         try
         {
-            createRelayButton.interactable = false;
-            joinRelayButton.interactable = false;
-            
             Allocation allocation = await RelayService.Instance.CreateAllocationAsync(8);
             joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
             
@@ -100,11 +92,10 @@ public class Relay : MonoBehaviour
         }
         catch (Exception e)
         {
-            createRelayButton.interactable = true;
-            joinRelayButton.interactable = true;
             Debug.Log(e);
         }
         
+        ConnectToRoom();
         codeDisplay.text = joinCode;
     }
     #endregion
@@ -113,12 +104,9 @@ public class Relay : MonoBehaviour
     public async void JoinRelay()
     {
         if (GameManager.Instance.isLocalGame) return;
-        string inputJoinCode = inputField.text;
-
         try
         {
-            createRelayButton.interactable = false;
-            joinRelayButton.interactable = false;
+            string inputJoinCode = gameData.joinCode;
             Debug.Log("Joining relay with: " + inputJoinCode);
             JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(inputJoinCode);
             
@@ -133,15 +121,13 @@ public class Relay : MonoBehaviour
             
             NetworkManager.Singleton.StartClient();
             ConnectToRoom();
+            
+            codeDisplay.text = inputJoinCode;
         }
         catch (Exception e)
         {
             Debug.Log(e);
-            createRelayButton.interactable = true;
-            joinRelayButton.interactable = true;
         }
-        
-        codeDisplay.text = inputJoinCode;
     }
     #endregion
 }

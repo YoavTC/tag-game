@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.Tutorials.Core.Editor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -22,7 +19,7 @@ public class SliderVisualizer : MonoBehaviour
     public void OnSliderValueChange()
     {
         float value = (float) (Math.Truncate(slider.value * 100) / 100);
-        if (baseText.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(baseText))
         {
             baseText = string.Format(sliderVisualizer.text);
             OnSliderValueChange();

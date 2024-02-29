@@ -6,11 +6,12 @@ using Random = UnityEngine.Random;
 
 public class GameManager : NetworkSingleton<GameManager>
 {
-    [SerializeField] private UIAnimator startGameAnimator;
+    [SerializeField] private GameData gameData;
     
     [Header("Objects")]
     [SerializeField] public CameraMovement clientCamera;
     [SerializeField] private GameObject playerPrefab;
+    [SerializeField] private UIAnimator startGameAnimator;
     
     [Header("Network Variables")]
     public bool isLocalGame;
@@ -25,11 +26,13 @@ public class GameManager : NetworkSingleton<GameManager>
     void Start()
     {
         //Check if game is local or not
-        isLocalGame = NetworkModeCommunicator.isGameLocal;
+        isLocalGame = !gameData.isOnline;
         
         //If game is local, set up local play game state. Else, set up network game state
-        if (isLocalGame) currentLocalGameState = GameState.PRE;
+        if (isLocalGame) ChangeLocalGameState(GameState.PRE);
         else currentNetworkGameState.Value = GameState.PRE;
+
+        //StartGame();
     }
     
     public void StartGame()
@@ -37,7 +40,6 @@ public class GameManager : NetworkSingleton<GameManager>
         if (isLocalGame)
         {
             ChangeLocalGameState(GameState.STARTING);
-            TagRandomPlayer();
         }
         else
         {
@@ -51,32 +53,28 @@ public class GameManager : NetworkSingleton<GameManager>
                 taggedPlayerClientID.Value = randomClientID;
             
                 TagRandomPlayerClientRpc(randomClientID);
-            } 
+            } Debug.Log("Host?: " + IsHost);
         }
     }
     
     [ClientRpc]
     public void ChangeLocalGameStateClientRpc(GameState newGameState)
     {
-        GameState currentGameState = currentNetworkGameState.Value;
         Debug.Log("ChangedLocalGameState to " + newGameState + " - " + OwnerClientId);
         switch (newGameState)
         {
             case GameState.PRE:
                 break;
             case GameState.STARTING:
-                if (currentGameState == GameState.PRE)
+                startGameAnimator.AnimateConnectUIOut();
+                clientCamera.SetFollowPlayerState(true);
+                TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
+                //Start Game
+                PlayerController[] players = FindObjectsOfType<PlayerController>();
+                for (int i = 0; i < players.Length; i++)
                 {
-                    startGameAnimator.AnimateConnectUIOut();
-                    clientCamera.SetFollowPlayerState(true);
-                    TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
-                    //Start Game
-                    PlayerController[] players = FindObjectsOfType<PlayerController>();
-                    for (int i = 0; i < players.Length; i++)
-                    {
-                        localClientTransforms.Add(players[i].OwnerClientId ,players[i].transform);
-                        SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
-                    }
+                    localClientTransforms.Add(players[i].OwnerClientId ,players[i].transform);
+                    SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
                 }
                 break;
             case GameState.ACTIVE:
@@ -100,25 +98,25 @@ public class GameManager : NetworkSingleton<GameManager>
             case GameState.PRE:
                 break;
             case GameState.STARTING:
-                if (currentLocalGameState == GameState.PRE)
-                {
-                    //spawn players
-                    Instantiate(playerPrefab, transform.position, Quaternion.identity);
-                    Instantiate(playerPrefab, transform.position, Quaternion.identity);
+                //spawn players
+                Instantiate(playerPrefab, transform.position, Quaternion.identity);
+                Instantiate(playerPrefab, transform.position, Quaternion.identity);
 
-                    var tempCam = GameObject.FindWithTag("TempCamera").AddComponent<CameraMovement>();
-                    tempCam.GetComponent<CameraMovement>().MoveToPosition(new Vector3(-1.5f,16,-10));
-                    tempCam.GetComponent<Camera>().orthographicSize = 22.5f;
-                    startGameAnimator.AnimateConnectUIOut();
-                    TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
+                var tempCam = GameObject.FindWithTag("TempCamera").AddComponent<CameraMovement>();
+                tempCam.GetComponent<CameraMovement>().MoveToPosition(new Vector3(-1.5f,16,-10));
+                tempCam.GetComponent<Camera>().orthographicSize = 22.5f;
+                startGameAnimator.AnimateConnectUIOut();
+                TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
                     
-                    //Start game
-                    PlayerController[] players = FindObjectsOfType<PlayerController>();
-                    for (int i = 0; i < players.Length; i++)
-                    {
-                        SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
-                    }
+                //Start game
+                PlayerController[] players = FindObjectsOfType<PlayerController>();
+                for (int i = 0; i < players.Length; i++)
+                {
+                    SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
                 }
+                
+                //Tag random player
+                TagRandomPlayer();
                 break;
             case GameState.ACTIVE:
                 break;

@@ -12,4 +12,7 @@ public class GameData : ScriptableObject
     //Elimination 2
 
     public float speedMultiplier, jumpMultiplier, taggerSpeedMultiplier, tagStunDuration, doubleJumps, eliminationTime;
+
+    public bool isHost;
+    public string joinCode;
 }

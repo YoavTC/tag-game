@@ -15,7 +15,7 @@ public class TitleSystem : Singleton<TitleSystem>
     private void Start()
     {
         isLocalGame = GameManager.Instance.isLocalGame;
-        titleText = gameObject.GetComponent<TMP_Text>();
+        titleText = GetComponent<TMP_Text>();
     }
 
     [Button]
