@@ -70,7 +70,7 @@ public class Relay : MonoBehaviour
         GameManager.Instance.ChangeLocalGameStateClientRpc(GameState.PRE);
     }
     
-    #region CreateRelay
+    
     public async void CreateRelay()
     {
         if (GameManager.Instance.isLocalGame) return;
@@ -98,9 +98,7 @@ public class Relay : MonoBehaviour
         ConnectToRoom();
         codeDisplay.text = joinCode;
     }
-    #endregion
-
-    #region JoinRelay
+    
     public async void JoinRelay()
     {
         if (GameManager.Instance.isLocalGame) return;
@@ -129,5 +127,4 @@ public class Relay : MonoBehaviour
             Debug.Log(e);
         }
     }
-    #endregion
 }

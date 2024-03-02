@@ -50,7 +50,7 @@ public class PlayerController : NetworkBehaviour
         
         SetupBindings();
         SetupWaistband();
-        SetupGameSettings();
+        StartCoroutine(SetupGameSettings());
         
         //Delete other client's controller
         // if (!isLocalGame && !IsOwner && !testingMode) Destroy(this);
@@ -261,9 +261,12 @@ public class PlayerController : NetworkBehaviour
         GetComponent<SpriteSwapper>().SetColor((int) OwnerClientId);
     }
 
-    private void SetupGameSettings()
+    private IEnumerator SetupGameSettings()
     {
-        GameData gameData = GameSettingsManager.Instance.GetGameSettings();
+        yield return HelperFunctions.GetWait(0.25f);
+        
+        Debug.Log("Game data received!");
+        GameData gameData = GameSettingsManager.Instance.gameData;
         moveSpeed *= gameData.speedMultiplier;
         jumpForce *= gameData.jumpMultiplier;
         doubleJumps = (int) gameData.doubleJumps;

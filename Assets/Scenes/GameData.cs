@@ -1,9 +1,8 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "Game Data")]
-public class GameData : ScriptableObject
+public class GameData : ScriptableObject, INetworkSerializable
 {
     public bool isOnline;
     public int gameModeType; 
@@ -15,4 +14,19 @@ public class GameData : ScriptableObject
 
     public bool isHost;
     public string joinCode;
+    
+    public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
+    {
+        serializer.SerializeValue(ref isOnline);
+        serializer.SerializeValue(ref gameModeType);
+        serializer.SerializeValue(ref isHost);
+        serializer.SerializeValue(ref joinCode);
+        
+        serializer.SerializeValue(ref speedMultiplier);
+        serializer.SerializeValue(ref jumpMultiplier);
+        serializer.SerializeValue(ref taggerSpeedMultiplier);
+        serializer.SerializeValue(ref tagStunDuration);
+        serializer.SerializeValue(ref doubleJumps);
+        serializer.SerializeValue(ref eliminationTime);
+    }
 }

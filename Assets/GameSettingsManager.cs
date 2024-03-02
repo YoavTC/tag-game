@@ -1,25 +1,15 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using Newtonsoft.Json;
+using Unity.Netcode;
 using UnityEngine;
 
-public class GameSettingsManager : Singleton<GameSettingsManager>
+public class GameSettingsManager : NetworkSingleton<GameSettingsManager>
 {
-    [SerializeField] private GameData gameData;
-    
-    private void Start()
-    {
-        SetUpSettings();
-    }
+    //[SerializeField] private GameData _gameData;
+    public GameData gameData => _gameData.Value;
 
-    private void SetUpSettings()
-    {
-        
-    }
+    [SerializeField] private NetworkVariable<GameData> _gameData = new NetworkVariable<GameData>();
 
-    public GameData GetGameSettings()
-    {
-        GameData tempGameData = gameData;
-        return tempGameData;
-    }
+    //private string SerializeGameData(GameData sourceGameData) => JsonConvert.SerializeObject(sourceGameData);
+    //private GameData DeserializeGameData(string rawGameData) => JsonConvert.DeserializeObject<GameData>(rawGameData);
 }
