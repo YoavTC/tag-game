@@ -1,5 +1,6 @@
 using System.Collections;
 using DG.Tweening;
+using NaughtyAttributes;
 using Unity.Multiplayer.Samples.Utilities.ClientAuthority;
 using Unity.Netcode;
 using UnityEngine;
@@ -58,6 +59,7 @@ public class PlayerController : NetworkBehaviour
         //Set up variables
         rb = GetComponent<Rigidbody2D>();
         playerLayer = LayerMask.GetMask("Player");
+        
 
         //Spawn camera
         if (!isLocalGame && IsOwner)
@@ -235,7 +237,8 @@ public class PlayerController : NetworkBehaviour
         canTag = true;
     }
     #endregion
-    
+
+    #region Setup
     private void SetupBindings()
     {
         if (isLocalGame)
@@ -272,4 +275,5 @@ public class PlayerController : NetworkBehaviour
         doubleJumps = (int) gameData.doubleJumps;
         taggerMoveSpeed = moveSpeed * gameData.taggerSpeedMultiplier;
     }
+    #endregion
 }
