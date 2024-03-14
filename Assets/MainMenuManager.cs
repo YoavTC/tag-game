@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -26,6 +27,8 @@ public class MainMenuManager : MonoBehaviour
         doubleJumpSliders,
         eliminationTimeSliders;
     
+    [SerializeField] private MapSelector mapSelector;
+    
     public void StartGame()
     {
         Transform activeTab = null;
@@ -47,6 +50,8 @@ public class MainMenuManager : MonoBehaviour
         gameDataSettings.taggerSpeedMultiplier = taggerSpeedSliders[tabIndex].value;
         gameDataSettings.tagStunDuration = tagStunSliders[tabIndex].value;
         gameDataSettings.doubleJumps = doubleJumpSliders[tabIndex].value;
+        // gameDataSettings.map = mapSelector.maps.Keys.ToArray()[mapSelector.previewIndex]; 
+        gameDataSettings.map = mapSelector.maps.mapInstances[mapSelector.previewIndex].mapID;
         if (tabIndex == 2) gameDataSettings.eliminationTime = eliminationTimeSliders[0].value;
         //Move Scene
         SceneManager.LoadScene("GameScene");

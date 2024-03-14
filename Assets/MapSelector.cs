@@ -8,18 +8,20 @@ using UnityEngine.UI;
 
 public class MapSelector : MonoBehaviour
 {
-    [SerializeField] private SerializedDictionary<Maps, Sprite> maps = new SerializedDictionary<Maps, Sprite>();
+    //[SerializeField] public SerializedDictionary<Maps, Sprite> maps = new SerializedDictionary<Maps, Sprite>();
+    public MapList maps;
     private List<Sprite> mapSprites = new List<Sprite>();
     
     [SerializeField] private Image previewDisplay;
 
     private void Start()
     {
-        mapSprites = maps.Values.ToList();
+        //mapSprites = maps.Values.ToList();
+        mapSprites = maps.mapInstances.Select(item => item.previewSprite).ToList();
         ChangeMap(true);
     }
 
-    private int previewIndex;
+    public int previewIndex;
     
     public void ChangeMap(bool isRight)
     {
@@ -40,8 +42,6 @@ public class MapSelector : MonoBehaviour
 
 public enum Maps
 {
-    DEFAULT1,
-    DEFAULT2,
-    DEFAULT3,
-    DEFAULT4
+    TG_CLASSIC,
+    TG_WORKSITE
 }

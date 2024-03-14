@@ -14,6 +14,8 @@ public class GameData : ScriptableObject, INetworkSerializable
 
     public bool isHost;
     public string joinCode;
+
+    public Maps map;
     
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
     {
@@ -28,5 +30,7 @@ public class GameData : ScriptableObject, INetworkSerializable
         serializer.SerializeValue(ref tagStunDuration);
         serializer.SerializeValue(ref doubleJumps);
         serializer.SerializeValue(ref eliminationTime);
+        
+        serializer.SerializeValue(ref map);
     }
 }
