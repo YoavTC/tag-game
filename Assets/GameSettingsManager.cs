@@ -18,10 +18,11 @@ public class GameSettingsManager : NetworkSingleton<GameSettingsManager>
     [SerializeField] private MapList mapList;
     private void Start()
     {
-        //GameObject mapPrefab = mapList.mapInstances[]
-            //[_gameData.Value.map];
-        GameObject mapPrefab = mapList.mapInstances.FirstOrDefault(item => item.mapID == _gameData.Value.map)
-            //Get map prefab from map enum from the maps list
+        GameObject mapPrefab = mapList.mapInstances.FirstOrDefault(instance => instance.mapID == _gameData.Value.map).mapPrefab;
+        if (mapPrefab != null)
+        {
             Instantiate(mapPrefab);
+        }
+        else Instantiate(mapList.mapInstances[0].mapPrefab);
     }
 }
