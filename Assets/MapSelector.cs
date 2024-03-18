@@ -43,5 +43,7 @@ public class MapSelector : MonoBehaviour
 public enum Maps
 {
     TG_CLASSIC,
-    TG_WORKSITE
+    TG_WORKSITE,
+    TG_GYMBOREE,
+    TG_SPACESHIP
 }
