@@ -34,11 +34,11 @@ public class MenuButton : MonoBehaviour, ISelectHandler, IDeselectHandler, IPoin
     {
         
     }
-    
+
     private void AnimateShadow(bool isOut = false)
     {
         buttonShadow.DOKill();
-        
+
         Vector2 currentVector = buttonShadow.effectDistance;
         Vector2 endVector = isOut ? new Vector2(0, 0) : new Vector2(25, -25); 
         
