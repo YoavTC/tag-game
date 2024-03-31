@@ -159,7 +159,8 @@ public class PlayerController : NetworkBehaviour
                 TaggerDisplay.Instance.SetNewTagger(taggedPlayer);
             }
             
-            TitleSystem.Instance.DisplayText(isLocalGame ? "You tagged someone!!":"Tagged!!", true, "#4285f4");
+            //TitleSystem.Instance.DisplayText(isLocalGame ? "You tagged someone!!":"Tagged!!", true, "#4285f4");
+            TitleSystem.Instance.DisplayText("Tagged!!", true, "#4285f4");
         }
     }
 

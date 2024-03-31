@@ -12,6 +12,7 @@ public class GameManager : NetworkSingleton<GameManager>
     [SerializeField] public CameraMovement clientCamera;
     [SerializeField] private GameObject playerPrefab;
     [SerializeField] private UIAnimator startGameAnimator;
+    [SerializeField] private TimerHandler timerHandler;
     
     [Header("Network Variables")]
     public bool isLocalGame;
@@ -76,6 +77,9 @@ public class GameManager : NetworkSingleton<GameManager>
                     localClientTransforms.Add(players[i].OwnerClientId ,players[i].transform);
                     SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
                 }
+                
+                //Start timer
+                timerHandler.StartTimer();
                 break;
             case GameState.ACTIVE:
                 break;
@@ -117,6 +121,9 @@ public class GameManager : NetworkSingleton<GameManager>
                 
                 //Tag random player
                 TagRandomPlayer();
+                
+                //Start timer
+                timerHandler.StartTimer();
                 break;
             case GameState.ACTIVE:
                 break;

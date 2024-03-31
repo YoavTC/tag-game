@@ -53,6 +53,7 @@ public class MainMenuManager : MonoBehaviour
         // gameDataSettings.map = mapSelector.maps.Keys.ToArray()[mapSelector.previewIndex]; 
         gameDataSettings.map = mapSelector.maps.mapInstances[mapSelector.previewIndex].mapID;
         if (tabIndex == 2) gameDataSettings.eliminationTime = eliminationTimeSliders[0].value;
+        if (tabIndex == 1) gameDataSettings.eliminationTime = eliminationTimeSliders[1].value;
         //Move Scene
         SceneManager.LoadScene("GameScene");
     }
