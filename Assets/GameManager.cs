@@ -104,10 +104,11 @@ public class GameManager : NetworkSingleton<GameManager>
             case GameState.STARTING:
                 //spawn players
                 Instantiate(playerPrefab, transform.position, Quaternion.identity);
-                Instantiate(playerPrefab, transform.position, Quaternion.identity);
+                GameObject secondPlayer = Instantiate(playerPrefab, transform.position, Quaternion.identity);
+                secondPlayer.GetComponent<SpriteSwapper>().SetColor(1);
 
-                var tempCam = GameObject.FindWithTag("TempCamera").AddComponent<CameraMovement>();
-                tempCam.GetComponent<CameraMovement>().MoveToPosition(new Vector3(-1.5f,16,-10));
+                CameraMovement tempCam = GameObject.FindWithTag("TempCamera").AddComponent<CameraMovement>();
+                tempCam.MoveToPosition(new Vector3(-1.5f,16,-10));
                 tempCam.GetComponent<Camera>().orthographicSize = 22.5f;
                 startGameAnimator.AnimateConnectUIOut();
                 TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");

@@ -7,8 +7,6 @@ public class SpriteSwapper : MonoBehaviour
 {
     [SerializeField] private List<Color> colors = new List<Color>();
     
-    [SerializeField] private Sprite chaseSprite, runSprite;
-
     public void SetColor(int colorIndex)
     {
         Material waistbandMat = new Material(GetComponent<SpriteRenderer>().material);

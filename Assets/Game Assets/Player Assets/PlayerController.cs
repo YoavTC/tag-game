@@ -261,6 +261,7 @@ public class PlayerController : NetworkBehaviour
 
     private void SetupWaistband()
     {
+        if (isLocalGame) return;
         Debug.Log(OwnerClientId);
         GetComponent<SpriteSwapper>().SetColor((int) OwnerClientId);
     }
@@ -271,8 +272,8 @@ public class PlayerController : NetworkBehaviour
         
         Debug.Log("Game data received!");
         GameData gameData = GameSettingsManager.Instance.gameData;
-        moveSpeed *= gameData.speedMultiplier;
-        jumpForce *= gameData.jumpMultiplier;
+        moveSpeed = gameData.speedMultiplier;
+        jumpForce = gameData.jumpMultiplier;
         doubleJumps = (int) gameData.doubleJumps;
         taggerMoveSpeed = moveSpeed * gameData.taggerSpeedMultiplier;
     }
