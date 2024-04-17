@@ -62,6 +62,7 @@ public class MainMenuManager : MonoBehaviour
     [SerializeField] private TMP_InputField codeInputField;
     public void JoinGame()
     {
+        gameDataSettings.isOnline = true;
         gameDataSettings.isHost = false;
         gameDataSettings.joinCode = codeInputField.text;
         //Move Scene

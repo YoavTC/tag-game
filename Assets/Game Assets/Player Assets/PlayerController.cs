@@ -1,6 +1,8 @@
+using System;
 using System.Collections;
 using DG.Tweening;
 using NaughtyAttributes;
+using TMPro;
 using Unity.Multiplayer.Samples.Utilities.ClientAuthority;
 using Unity.Netcode;
 using UnityEngine;
@@ -12,6 +14,7 @@ public class PlayerController : NetworkBehaviour
     
     [Header("Camera")] 
     [SerializeField] private GameObject CameraPrefab;
+    private CameraMovement clientCamera;
 
     [Header("Movement Settings")] 
     [SerializeField] private float moveSpeed;
@@ -31,7 +34,6 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private GameObject tagParticle;
     [SerializeField] private GameObject jumpParticle;
     
-    
     [Header("Key Binds")] 
     private string moveInput = "M_PC_Horizontal";
     private string jumpInput = "L_PC1_Jump";
@@ -42,9 +44,21 @@ public class PlayerController : NetworkBehaviour
     private bool isOnGround;
     private int doubleJumps;
     private int extraJumps = 1;
-    
-    
-    private void Start()
+
+    public bool isDead;
+
+    private IEnumerator Start()
+    {
+        while (!IsSpawned)
+        {
+            yield return HelperFunctions.GetWait(0.1f);
+            Debug.Log("Not spawned yet...");
+        }
+        Debug.Log("Spawned, starting!");
+        NStart();
+    }
+
+    private void NStart()
     {
         Debug.Log("Player spawned!", transform);
         isLocalGame = GameManager.Instance.isLocalGame;
@@ -64,11 +78,12 @@ public class PlayerController : NetworkBehaviour
         //Spawn camera
         if (!isLocalGame && IsOwner)
         {
-            CameraMovement clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
+            clientCamera = Instantiate(CameraPrefab).GetComponent<CameraMovement>();
             clientCamera.InitiateCameraSettings(transform);
         }
         
         if (!isLocalGame) SpawnManager.Instance.SetSpawnPoint(transform, true);
+        transform.GetChild(0).GetComponent<TMP_Text>().text = OwnerClientId.ToString();
     }
     
     void Update()
@@ -100,9 +115,15 @@ public class PlayerController : NetworkBehaviour
             rb.velocity = new Vector2(rb.velocity.x, slamSpeed);
         }
     }
-    
-    //Draw tag radius
-    //private void OnDrawGizmos() { Gizmos.color = Color.red; Gizmos.DrawWireSphere(transform.position, taggingRadius); }
+
+    public void KillPlayer()
+    {
+        isDead = true;
+        isTagger = false;
+        canTag = false;
+        clientCamera.transform.position = new Vector3(-1.5f, 16f, -10f);
+        Destroy(gameObject);
+    }
 
     #region Jumping & Ground
     //Jump logic
@@ -271,11 +292,15 @@ public class PlayerController : NetworkBehaviour
         yield return HelperFunctions.GetWait(0.25f);
         
         Debug.Log("Game data received!");
+        isDead = false;
         GameData gameData = GameSettingsManager.Instance.gameData;
         moveSpeed = gameData.speedMultiplier;
         jumpForce = gameData.jumpMultiplier;
         doubleJumps = (int) gameData.doubleJumps;
         taggerMoveSpeed = moveSpeed * gameData.taggerSpeedMultiplier;
+        
+        //Spawn map
+        GameSettingsManager.Instance.SpawnMap();
     }
     #endregion
 }

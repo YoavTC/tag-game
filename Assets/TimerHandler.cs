@@ -64,6 +64,7 @@ public class TimerHandler : MonoBehaviour
         if (gameModeType == 2)
         {
             Debug.Log("Round over, starting again!");
+            //GameManager.Instance.KillTaggedPlayer();
             SetUpTimer();
         }
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Linq;
 using Newtonsoft.Json;
 using Unity.Netcode;
@@ -16,13 +17,20 @@ public class GameSettingsManager : NetworkSingleton<GameSettingsManager>
     //private GameData DeserializeGameData(string rawGameData) => JsonConvert.DeserializeObject<GameData>(rawGameData);
 
     [SerializeField] private MapList mapList;
-    private void Start()
+    
+    public void SpawnMap()
     {
+        Debug.Log("Received map " + _gameData.Value.map + ", trying to summon!");
         GameObject mapPrefab = mapList.mapInstances.FirstOrDefault(instance => instance.mapID == _gameData.Value.map).mapPrefab;
         if (mapPrefab != null)
         {
+            Debug.Log("Map found, summoning " + mapPrefab.name + " now!");
             Instantiate(mapPrefab);
         }
-        else Instantiate(mapList.mapInstances[0].mapPrefab);
+        else
+        {
+            Debug.Log("Map NOT found, summoning default instead!");
+            Instantiate(mapList.mapInstances[0].mapPrefab);
+        }
     }
 }

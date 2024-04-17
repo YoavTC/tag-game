@@ -18,6 +18,8 @@ public class GameManager : NetworkSingleton<GameManager>
     public bool isLocalGame;
     [SerializeField] public NetworkVariable<GameState> currentNetworkGameState = new NetworkVariable<GameState>(GameState.PRE);
     [SerializeField] private NetworkVariable<ulong> taggedPlayerClientID = new NetworkVariable<ulong>(57);
+
+    private List<ulong> deadClientIDs = new List<ulong>();
     
     [SerializeField] private GameState currentLocalGameState;
     [SerializeField] private Transform taggedPlayerTransform;
@@ -48,8 +50,12 @@ public class GameManager : NetworkSingleton<GameManager>
                 ChangeLocalGameStateClientRpc(GameState.STARTING);
             
                 //Tag random player
-                ulong[] connectedClients = NetworkManager.Singleton.ConnectedClientsIds.ToArray();
-                int randomClientIDIndex = Random.Range(0, connectedClients.Length);
+                List<ulong> connectedClients = NetworkManager.Singleton.ConnectedClientsIds.ToList();
+                foreach (var deadClient in deadClientIDs)
+                {
+                    connectedClients.Remove(deadClient);
+                }
+                int randomClientIDIndex = Random.Range(0, connectedClients.Count);
                 ulong randomClientID = connectedClients[randomClientIDIndex];
                 taggedPlayerClientID.Value = randomClientID;
             
@@ -145,7 +151,8 @@ public class GameManager : NetworkSingleton<GameManager>
     private void TagRandomPlayer()
     {
         PlayerController[] allPlayers = FindObjectsOfType<PlayerController>();
-        PlayerController randomPlayer = allPlayers[Random.Range(0, allPlayers.Length)];
+        PlayerController[] filteredPlayers = allPlayers.Where(player => !player.GetComponent<PlayerController>().isDead).ToArray();
+        PlayerController randomPlayer = filteredPlayers[Random.Range(0, allPlayers.Length)];
         randomPlayer.GetTagged();
     }
     
@@ -179,6 +186,15 @@ public class GameManager : NetworkSingleton<GameManager>
         
         //Update about tagging change
         TaggerDisplay.Instance.SetNewTagger(taggedTransform);
+    }
+
+    //Runs if the gamemode type is eliminations, once the timer reaches 0 
+    [ClientRpc]
+    public void KillTaggedPlayerClientRpc(ulong clientID)
+    {
+        deadClientIDs.Add(clientID);
+        Debug.Log("Timer reached 0, killing tagged player!");
+        taggedPlayerTransform.GetComponent<PlayerController>().KillPlayer();
     }
 }
 

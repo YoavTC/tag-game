@@ -27,10 +27,5 @@ public class SpawnManager : Singleton<SpawnManager>
             playerTransform.position = spawnPoints[spawnPointIndex].position;
             spawnPointIndex++;
         }
-
-        // playerTransform.DOMoveZ(-5, 5f).OnComplete(() =>
-        // {
-        //     playerTransform.GetComponent<ClientNetworkTransform>().SyncPositionZ = false;
-        // });
     }
 }

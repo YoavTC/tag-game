@@ -17,12 +17,9 @@ public class Tabs : MonoBehaviour
 
     [SerializeField] private bool visualChanges = false;
 
-    [SerializeField] private AudioClip bgMusic;
-
     private void Start()
     {
         HideTabsContent(transform);
-        AudioManager.Instance.PlaySound(bgMusic, new SoundOptions(0.75f, 1, 0f, true, false, new Vector2()));
     }
 
     public void ClickedTab(Transform tabTransform)
