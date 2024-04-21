@@ -67,6 +67,7 @@ public class GameManager : NetworkSingleton<GameManager>
     [ClientRpc]
     public void ChangeLocalGameStateClientRpc(GameState newGameState)
     {
+        if (isLocalGame) return;
         Debug.Log("ChangedLocalGameState to " + newGameState + " - " + OwnerClientId);
         switch (newGameState)
         {
@@ -83,6 +84,7 @@ public class GameManager : NetworkSingleton<GameManager>
                     localClientTransforms.Add(players[i].OwnerClientId ,players[i].transform);
                     SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
                 }
+                Debug.Log("ChangeLocalGameStateClientRpc()");
                 
                 //Start timer
                 timerHandler.StartTimer();
@@ -118,16 +120,12 @@ public class GameManager : NetworkSingleton<GameManager>
                 tempCam.GetComponent<Camera>().orthographicSize = 22.5f;
                 startGameAnimator.AnimateConnectUIOut();
                 TitleSystem.Instance.DisplayText("Game Started!", true, "#5AD32C");
-                    
-                //Start game
-                PlayerController[] players = FindObjectsOfType<PlayerController>();
-                for (int i = 0; i < players.Length; i++)
-                {
-                    SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
-                }
                 
                 //Tag random player
                 TagRandomPlayer();
+                
+                //Move players to spawn locations
+                
                 
                 //Start timer
                 timerHandler.StartTimer();
