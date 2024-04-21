@@ -47,20 +47,8 @@ public class PlayerController : NetworkBehaviour
 
     public bool isDead;
 
-    private IEnumerator Start()
+    private void Start()
     {
-        while (!IsSpawned)
-        {
-            yield return HelperFunctions.GetWait(0.1f);
-            Debug.Log("Not spawned yet...");
-        }
-        Debug.Log("Spawned, starting!");
-        NStart();
-    }
-
-    private void NStart()
-    {
-        Debug.Log("Player spawned!", transform);
         isLocalGame = GameManager.Instance.isLocalGame;
         
         SetupBindings();
@@ -82,7 +70,11 @@ public class PlayerController : NetworkBehaviour
             clientCamera.InitiateCameraSettings(transform);
         }
         
-        if (!isLocalGame) SpawnManager.Instance.SetSpawnPoint(transform, true);
+        if (!isLocalGame)
+        {
+            transform.position = new Vector3(0, 80, 0);
+            //SpawnManager.Instance.SetSpawnPoint(transform, true);
+        }
         transform.GetChild(0).GetComponent<TMP_Text>().text = OwnerClientId.ToString();
     }
     
