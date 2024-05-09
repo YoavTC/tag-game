@@ -29,10 +29,6 @@ public class PlayerController : NetworkBehaviour
     [SerializeField] private float taggingRadius;
     [SerializeField] private float tagCooldown;
     private NetworkVariable<bool> isTaggerNetwork = new NetworkVariable<bool>(false, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Owner);
-
-    [Header("Particles")]
-    [SerializeField] private GameObject tagParticle;
-    [SerializeField] private GameObject jumpParticle;
     
     [Header("Key Binds")] 
     private string moveInput = "M_PC_Horizontal";
@@ -46,6 +42,14 @@ public class PlayerController : NetworkBehaviour
     private int extraJumps = 1;
 
     public bool isDead;
+    
+    [Header("Particles")]
+    [SerializeField] private GameObject tagParticle;
+    [SerializeField] private GameObject jumpParticle;
+
+    [Header("Audio")] 
+    [SerializeField] private AudioClip jumpClips;
+    [SerializeField] private AudioClip explodeClip;
 
     private void Start()
     {
@@ -127,6 +131,9 @@ public class PlayerController : NetworkBehaviour
         if (!isOnGround) Instantiate(jumpParticle, transform);
         
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+        
+        //Play audio
+        AudioManager.Instance.PlaySFX(jumpClips, true);
     }
     
     //Ground check detection

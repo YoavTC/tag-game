@@ -21,7 +21,8 @@ public class GameSettingsManager : NetworkSingleton<GameSettingsManager>
     
     public void SpawnMap()
     {
-        if (GameManager.Instance.isLocalGame && alreadySpawned) return;
+        if (alreadySpawned) return;
+        // if (GameManager.Instance.isLocalGame) return;
         Debug.Log("Received map " + _gameData.Value.map + ", trying to summon!");
         GameObject mapPrefab = mapList.mapInstances.FirstOrDefault(instance => instance.mapID == _gameData.Value.map).mapPrefab;
         if (mapPrefab != null)

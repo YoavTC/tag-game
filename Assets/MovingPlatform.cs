@@ -4,15 +4,14 @@ using System.Collections.Generic;
 using DG.Tweening;
 using UnityEngine;
 
-public class MovingPlatform : MonoBehaviour
+public class MovingPlatform : Singleton<MovingPlatform>
 {
-    Vector3 positionB;
+    [SerializeField] private Transform positionB;
     [SerializeField] private float platformSpeed;
     [SerializeField] private Ease easeType;
 
-    private void Start()
+    public void StartMoving()
     {
-        positionB = transform.GetChild(0).transform.position;
-        transform.DOMove(positionB, platformSpeed).SetEase(easeType).SetLoops(-1, LoopType.Yoyo);
+        transform.DOMove(positionB.position, platformSpeed).SetEase(easeType).SetLoops(-1, LoopType.Yoyo);
     }
 }

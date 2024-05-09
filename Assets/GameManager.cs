@@ -85,6 +85,7 @@ public class GameManager : NetworkSingleton<GameManager>
                     SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
                 }
                 Debug.Log("ChangeLocalGameStateClientRpc()");
+                if (MovingPlatform.Instance != null) MovingPlatform.Instance.StartMoving();
                 
                 //Start timer
                 timerHandler.StartTimer();
@@ -124,8 +125,7 @@ public class GameManager : NetworkSingleton<GameManager>
                 //Tag random player
                 TagRandomPlayer();
                 
-                //Move players to spawn locations
-                
+                if (MovingPlatform.Instance != null) MovingPlatform.Instance.StartMoving();
                 
                 //Start timer
                 timerHandler.StartTimer();
