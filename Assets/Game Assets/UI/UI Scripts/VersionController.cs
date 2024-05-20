@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,6 +18,8 @@ public class VersionController : MonoBehaviour
     public int currentVersionInt => _currentVersionInt;
     
     [SerializeField] private GameObject versionMismatchNotifier;
+    [SerializeField] private ErrorData errorData;
+    [SerializeField] private ErrorManager errorManager;
     
     void Start()
     {
@@ -27,10 +30,12 @@ public class VersionController : MonoBehaviour
 
     private IEnumerator FetchVersion()
     {
+        bool displayVersionError = true;
+        
         using (UnityWebRequest request = UnityWebRequest.Get(URL))
         {
             yield return request.SendWebRequest();
-
+            
             if (request.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log("Data fetched successfully from " + URL + ":");
@@ -43,11 +48,17 @@ public class VersionController : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Error fetching data: " + request.error);
+                errorData.hasError = true;
+                errorData.errorCode = (int) request.responseCode;
+                errorData.errorMessage = request.error;
+                
+                errorManager.DisplayError();
+                displayVersionError = false;
+                //Debug.LogError("Error fetching data: " + request.error);
             }
         }
 
-        if (_currentVersionInt != fetchedVersionInt)
+        if ((_currentVersionInt != fetchedVersionInt) && displayVersionError)
         {
             Debug.Log("Version mismatch!");
             versionMismatchNotifier.SetActive(true);

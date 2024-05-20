@@ -16,6 +16,7 @@ using UnityEngine.UI;
 
 public class Relay : MonoBehaviour
 {
+    [SerializeField] private ErrorData errorData;
     [SerializeField] private GameData gameData;
     [SerializeField] private TMP_Text codeDisplay;
     [SerializeField] private UIAnimator startUIAnimator;
@@ -30,37 +31,47 @@ public class Relay : MonoBehaviour
 
     async void InitializeGame()
     {
-        if (GameManager.Instance.isLocalGame)
+        try
         {
-            Debug.Log("Starting Local Game...");
-            GameManager.Instance.ChangeLocalGameState(GameState.STARTING);
-            //ConnectToRoom();
-        }
-        else
-        {
-            Debug.Log("Starting Online Game...");
-            InitializationOptions hostOptions = new InitializationOptions().SetProfile("host");
-            InitializationOptions clientOptions = new InitializationOptions().SetProfile("client");
-
-            await UnityServices.InitializeAsync(hostOptions);
-
-            AuthenticationService.Instance.SignedIn += () =>
+            if (GameManager.Instance.isLocalGame)
             {
-                Debug.Log("Signed in: " + AuthenticationService.Instance.PlayerId);
-            };
-
-            if (AuthenticationService.Instance.IsAuthorized)
-            {
-                Debug.Log("Authorized");
-                AuthenticationService.Instance.SignOut();
-                await UnityServices.InitializeAsync(clientOptions);
+                Debug.Log("Starting Local Game...");
+                GameManager.Instance.ChangeLocalGameState(GameState.STARTING);
+                //ConnectToRoom();
             }
-
-            await AuthenticationService.Instance.SignInAnonymouslyAsync();
-            if (gameData.isHost)
+            else
             {
-                CreateRelay();
-            } else JoinRelay();
+                Debug.Log("Starting Online Game...");
+                InitializationOptions hostOptions = new InitializationOptions().SetProfile("host");
+                InitializationOptions clientOptions = new InitializationOptions().SetProfile("client");
+
+                await UnityServices.InitializeAsync(hostOptions);
+
+                AuthenticationService.Instance.SignedIn += () =>
+                {
+                    Debug.Log("Signed in: " + AuthenticationService.Instance.PlayerId);
+                };
+
+                if (AuthenticationService.Instance.IsAuthorized)
+                {
+                    Debug.Log("Authorized");
+                    AuthenticationService.Instance.SignOut();
+                    await UnityServices.InitializeAsync(clientOptions);
+                }
+
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                if (gameData.isHost)
+                {
+                    CreateRelay();
+                } else JoinRelay();
+            }
+        }
+        catch (Exception e)
+        {
+            errorData.hasError = true;
+            errorData.errorMessage = e.Message;
+            errorData.errorCode = e.HResult;
+            SceneManager.LoadScene(0);
         }
     }
 
@@ -92,7 +103,10 @@ public class Relay : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.Log(e);
+            errorData.hasError = true;
+            errorData.errorMessage = e.Message;
+            errorData.errorCode = e.HResult;
+            SceneManager.LoadScene(0);
         }
         
         ConnectToRoom();
@@ -121,10 +135,15 @@ public class Relay : MonoBehaviour
             ConnectToRoom();
             
             codeDisplay.text = inputJoinCode;
+
+            errorData.hasError = false;
         }
         catch (Exception e)
         {
-            Debug.Log(e);
+            errorData.hasError = true;
+            errorData.errorMessage = e.Message;
+            errorData.errorCode = e.HResult;
+            SceneManager.LoadScene(0);
         }
     }
 }

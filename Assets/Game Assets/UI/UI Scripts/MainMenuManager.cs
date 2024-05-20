@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using EasyTransition;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,9 @@ public class MainMenuManager : MonoBehaviour
         //Reset join code
         gameDataSettings.joinCode = "NULL";
     }
+
+    [Header("Transition Settings")]
+    [SerializeField] private TransitionSettings transitionSettings;
     
     #region Create
     [Header("Create UI Settings")]
@@ -55,7 +59,8 @@ public class MainMenuManager : MonoBehaviour
         if (tabIndex == 2) gameDataSettings.eliminationTime = eliminationTimeSliders[0].value;
         if (tabIndex == 1) gameDataSettings.eliminationTime = eliminationTimeSliders[1].value;
         //Move Scene
-        SceneManager.LoadScene("GameScene");
+        //SceneManager.LoadScene("GameScene");
+        TransitionManager.Instance().Transition("GameScene", transitionSettings, 0);
     }
     #endregion
 
@@ -66,6 +71,7 @@ public class MainMenuManager : MonoBehaviour
         gameDataSettings.isHost = false;
         gameDataSettings.joinCode = codeInputField.text;
         //Move Scene
-        SceneManager.LoadScene("GameScene");
+        //SceneManager.LoadScene("GameScene");
+        TransitionManager.Instance().Transition("GameScene", transitionSettings, 0);
     }
 }

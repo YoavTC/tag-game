@@ -79,6 +79,10 @@ public class PlayerController : NetworkBehaviour
             transform.position = new Vector3(0, 80, 0);
             //SpawnManager.Instance.SetSpawnPoint(transform, true);
         }
+        
+        //Fade out black screen
+        IntroCanvas.Instance.StartIntro();
+        
         transform.GetChild(0).GetComponent<TMP_Text>().text = OwnerClientId.ToString();
     }
     

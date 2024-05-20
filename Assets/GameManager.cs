@@ -40,6 +40,7 @@ public class GameManager : NetworkSingleton<GameManager>
     
     public void StartGame()
     {
+        Debug.Log("??????????????");
         if (isLocalGame)
         {
             ChangeLocalGameState(GameState.STARTING);
@@ -84,8 +85,6 @@ public class GameManager : NetworkSingleton<GameManager>
                     localClientTransforms.Add(players[i].OwnerClientId ,players[i].transform);
                     SpawnManager.Instance.SetSpawnPoint(players[i].transform, false);
                 }
-                Debug.Log("ChangeLocalGameStateClientRpc()");
-                if (MovingPlatform.Instance != null) MovingPlatform.Instance.StartMoving();
                 
                 //Start timer
                 timerHandler.StartTimer();
@@ -124,8 +123,6 @@ public class GameManager : NetworkSingleton<GameManager>
                 
                 //Tag random player
                 TagRandomPlayer();
-                
-                if (MovingPlatform.Instance != null) MovingPlatform.Instance.StartMoving();
                 
                 //Start timer
                 timerHandler.StartTimer();
